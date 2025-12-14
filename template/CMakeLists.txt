@@ -4,7 +4,7 @@ cmake_minimum_required( VERSION 3.20.0 )
 # set the board in use if you don't want to pass it as a parameter
 # west build -p always -b <board_name> app 
 set(BOARD nrf54l15dk/nrf54l15/cpuapp)
-#set(BOARD nucleo_g0n1re)
+#set(BOARD nucleo_g0b1re)
 #set(BOARD native_sim)
 # build with DT doctor to debug device tree issues
 set(ZEPHYR_SCA_VARIANT dtdoctor)
