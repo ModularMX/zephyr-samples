@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @brief Toggle one pin using port function
+ * @brief Toggle two pins in the same port
  * 
  * This sample application shows how to toggle more than one pin using the port function
  * gpio_port_toggle_bits(). The pins to toggle are defined based on the board in use.
