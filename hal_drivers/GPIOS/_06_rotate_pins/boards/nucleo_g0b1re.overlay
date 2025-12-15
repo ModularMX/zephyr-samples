@@ -1,0 +1,17 @@
+/ {
+    aliases {
+        gpio = &gpioa;
+    };
+};
+
+&gpioa {
+    /* Declare an internal node name "pins" and set pins 0-4 as output with init 
+    state as low level, you can read gpio-controller.yaml file to check the 
+    rest of the properties */
+    pins {
+        gpio-hog;
+        gpios = <0 GPIO_ACTIVE_HIGH>, <1 GPIO_ACTIVE_HIGH>, <2 GPIO_ACTIVE_HIGH>, <3 GPIO_ACTIVE_HIGH>, <4 GPIO_ACTIVE_HIGH>;
+        output-low;
+        line-name = "shift pin"; 
+    };
+};
