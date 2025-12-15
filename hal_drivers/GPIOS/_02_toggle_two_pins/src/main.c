@@ -41,7 +41,7 @@ int main( void )
     while(1)
     {
         /* Toggle two pins from port using a port function */
-        gpio_port_toggle_bits( port, (1<<PORT_PINA) | (1<<PORT_PINB) );
+        gpio_port_toggle_bits( port, BIT(PORT_PINA) | BIT(PORT_PINB) );
         /* 300ms Delay */
         k_msleep( 300 );
     }
