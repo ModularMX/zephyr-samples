@@ -1,0 +1,10 @@
+/ {
+    aliases {
+        gpio = &gpio0;
+    };
+};
+
+/*set the port to only have 5 pins*/
+&gpio0 {
+    ngpios = <5>;
+};
