@@ -1,0 +1,20 @@
+/ {
+    aliases {
+        myled = &myLed_0;
+        mybtn = &myBtn_0;
+    };
+
+    /* Create a node and called leds */
+    myLed_0: myLed_0 {
+        /* use our custom binding */
+        compatible = "pin-custom";
+        gpios = <&gpioa 5 GPIO_ACTIVE_HIGH>;
+    };
+
+    /* Create a node called button */
+    myBtn_0: myBtn_0 {
+        /* use our custom binding */
+        compatible = "pin-custom";
+        gpios = <&gpioc 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+    };
+};

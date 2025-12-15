@@ -1,0 +1,13 @@
+# binding description
+description: pin for multipurpose (input/output) use
+
+# binding name (this is the one will be used in the device tree file)
+compatible: "pin-custom"
+
+# properties our node will have, in our case there is just one called gpios
+# which will be mandatory and their values are in a multi type array
+properties:
+  gpios:
+    type: phandle-array
+    required: true
+    description: The GPIO pin connected as input or output.
