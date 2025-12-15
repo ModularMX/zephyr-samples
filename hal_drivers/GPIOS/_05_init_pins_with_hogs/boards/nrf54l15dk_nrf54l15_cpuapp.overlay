@@ -1,0 +1,17 @@
+/ {
+    aliases {
+        gpio = &gpio2;
+    };
+};
+
+&gpio2 {
+    /* Declare an internal node name "pin" and set pin 9 as output with init 
+    state as high level, you can read gpio-controller.yaml file to check the 
+    rest of the properties */
+    pin {
+        gpio-hog;
+        gpios = <9 GPIO_ACTIVE_HIGH>;
+        output-high;
+        line-name = "output pin"; 
+    };
+};
