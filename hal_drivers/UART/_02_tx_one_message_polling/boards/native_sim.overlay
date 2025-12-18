@@ -1,0 +1,10 @@
+/ {
+    aliases {
+        uart = &uart1;
+    };
+};
+
+/*no need to configure more parameters since it is an emulation, speed is not relevant*/
+&uart1 {
+		status = "okay";
+};
