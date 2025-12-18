@@ -1,0 +1,9 @@
+/ {
+    aliases {
+        uart = &uart1;
+    };
+};
+
+&uart1 {
+		status = "okay";
+};
