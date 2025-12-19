@@ -1,0 +1,18 @@
+/ {
+    aliases {
+        uart = &usart2;
+    };  
+};
+
+/*configure the uart 20, 115200 bauds, 8N1. ST already ships pins configuration
+definition as part of the hal_smt32 module, refer to 
+stm32g0b1c(b-c-e)tx-pinctrl.dtsi and stm32g0b1c(b-c-e)ixn-pinctrl.dtsi*/
+&usart2 {
+    status = "okay";
+    current-speed = <115200>;
+    stop-bits = "1";
+    data-bits = <8>;
+    parity = "none";
+	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+	pinctrl-names = "default";
+};
