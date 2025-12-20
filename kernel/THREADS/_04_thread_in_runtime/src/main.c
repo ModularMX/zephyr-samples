@@ -32,16 +32,21 @@ int main( void )
     /* Register another thread and run after 2 seconds */
     k_tid_t  thread_id1 = k_thread_create( &thread_tcb1, thread_stack1, K_THREAD_STACK_SIZEOF(thread_stack1),
                                    thread_func, "Thread 1", NULL, NULL, 5, 0, K_SECONDS(2));
+
+    (void)thread_id0;
+    (void)thread_id1;
+    
     return 0;
 }
 
 /* Define the function used as thread */
 void thread_func( void *p1, void *p2, void *p3 )
 {
+    char *thread_name = (char *) p1;
 	while(1) 
 	{
         /*just print a message*/
-        printk("Message from %s\r", p1);
+        printk("Message from %s\r", thread_name);
 		/* Send thread to sleep for 500ms */
 		k_msleep( 1000 );
 	}
