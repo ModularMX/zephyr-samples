@@ -1,0 +1,5 @@
+storage
+kernel/MQUEUES
+kernel/MAILBOXES
+hal_drivers/INTERRUPTS
+middleware
