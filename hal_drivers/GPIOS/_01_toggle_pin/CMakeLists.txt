@@ -7,8 +7,10 @@ cmake_minimum_required( VERSION 3.20.0 )
 #set(BOARD nucleo_g0b1re)
 #set(BOARD native_sim)
 
-# build with DT doctor to debug device tree issues
-set(ZEPHYR_SCA_VARIANT dtdoctor)
+# WARNING: DT doctor generates very long command lines on Windows
+# which can exceed the Windows command line limit (8191 chars).
+# Only enable temporarily for device tree debugging.
+# set(ZEPHYR_SCA_VARIANT dtdoctor)
 
 # Get Zephyr directory
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
