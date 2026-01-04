@@ -1,0 +1,50 @@
+/*
+ * LED Driver Configuration Example - Devicetree Overlay
+ * 
+ * This overlay demonstrates how to configure and extend LED definitions
+ * using Zephyr's devicetree system.
+ * 
+ * IMPORTANT CONCEPTS:
+ * 1. The STM32H573I-DK board already has a "leds" node defined in its base DTS
+ *    with 4 LEDs (green_led_0, orange_led_0, red_led_0, blue_led_0)
+ * 2. This overlay uses "&leds" to extend/modify the existing leds node
+ * 3. New LED definitions can be added inside &leds { ... }
+ * 4. Existing LEDs from the base DTS are automatically included
+ */
+
+/ {
+	/*
+	 * Extend the existing leds node (defined in the board DTS).
+	 * Note: the board's leds node has no explicit label, so we reopen it
+	 * by path under the root ("/ { leds { ... } }"), not with &leds.
+	 */
+	leds {
+		/*
+		 * Arduino D0 LED (mapped to GPIOB pin 11)
+		 * This LED is defined in addition to the 4 existing board LEDs.
+		 * 
+		 * Syntax explanation:
+		 * - led_name: label for referencing in code (optional)
+		 * - led_x { ... }: LED node definition
+		 * - gpios: specifies GPIO port, pin, and active state
+		 *   Format: <&gpio_port pin_number GPIO_ACTIVE_LOW/HIGH>
+		 * - label: human-readable name (optional but recommended)
+		 */
+		custom_led: custom_led_0 {
+			// Arduino header D0 -> GPIOB pin 11, active low configuration
+			// GPIO_ACTIVE_LOW means the LED turns on when pin is LOW
+			gpios = <&gpiob 11 GPIO_ACTIVE_LOW>;
+			label = "Arduino D0 LED";
+		};
+
+		/*
+		 * Arduino D1 LED (mapped to GPIOB pin 10)
+		 */
+		status_led: status_led_0 {
+			// Arduino header D1 -> GPIOB pin 10, active low configuration
+			gpios = <&gpiob 10 GPIO_ACTIVE_LOW>;
+			label = "Arduino D1 LED";
+		};
+	};
+};
+
