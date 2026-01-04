@@ -1,0 +1,25 @@
+/*
+ * XIAO ESP32C6 overlay for double tap button example
+ * Uses GPIO18 (onboard button) with internal pull-up
+ */
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	buttons: buttons {
+		compatible = "gpio-keys";
+		
+		button0: button_0 {
+			gpios = <&gpio0 18 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	double_tap {
+		compatible = "zephyr,input-double-tap";
+		input = <&buttons>;
+		input-codes = <INPUT_KEY_0>;        /* Monitor button 0 */
+		double-tap-codes = <INPUT_KEY_A>;   /* Emit KEY_A on double tap */
+		double-tap-delay-ms = <300>;        /* 300ms window between taps */
+	};
+};

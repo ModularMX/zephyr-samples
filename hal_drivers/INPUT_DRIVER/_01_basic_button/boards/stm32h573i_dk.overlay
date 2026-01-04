@@ -1,0 +1,10 @@
+/*
+ * STM32H573I-DK ya tiene un botón de usuario definido en el DTS base:
+ *   - gpio_keys/user_button en PC13
+ *   - Alias: sw0
+ *   - zephyr,code = INPUT_KEY_0
+ *
+ * No necesitamos redefinir nada en este overlay.
+ * El driver gpio-keys lo detectará automáticamente.
+ */
+

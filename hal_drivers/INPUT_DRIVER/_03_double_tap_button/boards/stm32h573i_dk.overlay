@@ -1,0 +1,28 @@
+/*
+ * STM32H573I-DK overlay for double tap button example
+ * Uses external button on Arduino D0 (PB10) with pull-up
+ * 
+ * NOTE: The onboard button had issues during testing, so we use an external button.
+ * Connect a push button between PB10 (Arduino D0) and GND.
+ */
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	buttons: buttons {
+		compatible = "gpio-keys";
+		
+		button0: button_0 {
+			gpios = <&gpiob 10 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	double_tap {
+		compatible = "zephyr,input-double-tap";
+		input = <&buttons>;
+		input-codes = <INPUT_KEY_0>;        /* Monitor button 0 */
+		double-tap-codes = <INPUT_KEY_A>;   /* Emit KEY_A on double tap */
+		double-tap-delay-ms = <300>;        /* 300ms window between taps */
+	};
+};

@@ -1,0 +1,11 @@
+/ {
+	buttons {
+		compatible = "gpio-keys";
+
+		user_button: button_0 {
+			gpios = <&gpio0 18 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "External Button Pull-Up GPIO18";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+};

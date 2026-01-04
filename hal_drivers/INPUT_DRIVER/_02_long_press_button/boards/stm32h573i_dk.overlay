@@ -1,0 +1,25 @@
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+    /* Define external button on Arduino D1 (PB10) */
+    buttons: buttons {
+        compatible = "gpio-keys";
+		
+        external_button: button_0 {
+            gpios = <&gpiob 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+            label = "External Button on Arduino D1 PB10";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	longpress {
+		compatible = "zephyr,input-longpress";
+		/* Reference our external button */
+		input = <&buttons>;
+		input-codes = <INPUT_KEY_0>;
+		short-codes = <INPUT_KEY_A>;
+		long-codes = <INPUT_KEY_X>;
+		long-delay-ms = <1000>;
+	};
+};
+
