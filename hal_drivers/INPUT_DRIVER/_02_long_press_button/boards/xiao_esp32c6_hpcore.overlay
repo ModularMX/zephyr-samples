@@ -1,0 +1,22 @@
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	buttons: buttons {
+		compatible = "gpio-keys";
+
+		user_button: button_0 {
+			gpios = <&gpio0 18 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "External Button Pull-Up GPIO18";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	longpress {
+		compatible = "zephyr,input-longpress";
+		input = <&buttons>;
+		input-codes = <INPUT_KEY_0>;
+		short-codes = <INPUT_KEY_A>;
+		long-codes = <INPUT_KEY_X>;
+		long-delay-ms = <1000>;
+	};
+};
