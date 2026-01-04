@@ -1,0 +1,35 @@
+/*
+ * PWM LED configuration for STM32H573I-DK
+ * Using TIM2 (Timer 2) for hardware-based LED blinking on Arduino D0/D1
+ */
+
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
+/* Reconfigure PWM2 to use Arduino D0 and D1 pins instead of PA3 */
+&pwm2 {
+	pinctrl-0 = <&tim2_ch3_pb10 &tim2_ch4_pb11>;
+	pinctrl-names = "default";
+};
+
+/ {
+	pwmleds {
+		compatible = "pwm-leds";
+		
+		/* Arduino D1 - PB10 -> TIM2_CH3 */
+		pwm_led_d1: pwm_led_0 {
+			pwms = <&pwm2 3 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "PWM LED Arduino D1";
+		};
+
+		/* Arduino D0 - PB11 -> TIM2_CH4 */
+		pwm_led_d0: pwm_led_1 {
+			pwms = <&pwm2 4 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "PWM LED Arduino D0";
+		};
+	};
+
+	aliases {
+		pwm-led0 = &pwm_led_d1;
+		pwm-led1 = &pwm_led_d0;
+	};
+};
