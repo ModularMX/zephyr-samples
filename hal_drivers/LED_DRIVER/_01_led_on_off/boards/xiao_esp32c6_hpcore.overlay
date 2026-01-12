@@ -1,0 +1,14 @@
+/*
+ * XIAO ESP32-C6 LED overlay
+ * - Adds a user LED on D9 (GPIO20) using the gpio-leds driver.
+ * - Uses &leds to extend the existing LEDs node (defined by the board).
+ * - Active low: writing 0 turns the LED on.
+ */
+
+&leds {
+	/* D9 header pin -> GPIO20 */
+	d9_led: d9_led_0 {
+		gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+		label = "D9 User LED";
+	};
+};
