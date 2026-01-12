@@ -1,0 +1,6 @@
+/ {
+    aliases {
+        /* Use GPIO port F to match PF4 (blue LED) */
+        gpio = &gpiof;
+    };
+};

@@ -1,12 +1,16 @@
 /**
  * @file main.c
  * @brief Toggle one pin using port function
- * 
+ *
  * This sample application shows how to toggle a pin using the port function
  * gpio_pin_toggle(). The pin to toggle is defined based on the board in use.
- * - For the nrf54l15dk board, pin 9 from port 2 is toggled every 300ms.
- * - From the nucleo_g0b1re board, pin 5 from port A is toggled every 300ms.
- * - From the native_sim board, pin 0 from port 0 is toggled every 300ms.
+ * - For the nrf54l15dk board, pin 9 from port 2 is toggled.
+ * - For the nucleo_g0b1re board, pin 5 from port A is toggled.
+ * - For the stm32h573i_dk board, pin 4 from port F (blue LED) is toggled.
+ * - For the native_sim board, pin 0 from port 0 is toggled.
+ *
+ * The toggle delay can be configured at build time (default: 300ms).
+ * Example: west build -b <board> -- -DTOGGLE_DELAY_MS=500
  */
 /* Include libraries */
 #include <zephyr/kernel.h>
@@ -18,10 +22,13 @@ way to achieve hardware agnostic is use adefine with the pin to use
 according to board in use*/
 #ifdef CONFIG_SOC_NRF54L15
     #define PORT_PIN 9
-#elif CONFIG_SOC_STM32G0B1XX
-    #define PORT_PIN 5
-#elif CONFIG_SOC_POSIX
-    #define PORT_PIN 0
+#elif defined(CONFIG_SOC_STM32G0B1XX)
+#define PORT_PIN 5
+#elif defined(CONFIG_BOARD_STM32H573I_DK)
+/* Blue LED is on GPIOF pin 4 on stm32h573i_dk */
+#define PORT_PIN 4
+#elif defined(CONFIG_SOC_POSIX)
+#define PORT_PIN 0
 #else
     #error "Define the pin to toggle for your board"
 #endif 
@@ -38,8 +45,8 @@ int main( void )
     {
         /* Toggle pin from port using a port function */
         gpio_pin_toggle( port, PORT_PIN );
-        /* 300ms Delay */
-        k_msleep( 300 );
+        /* Delay configured at build time (default: 300ms) */
+        k_msleep(TOGGLE_DELAY_MS);
     }
     return 0;
 }
