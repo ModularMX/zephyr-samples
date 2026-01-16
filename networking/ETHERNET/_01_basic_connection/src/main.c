@@ -1,12 +1,13 @@
+/**
+ * @brief Basic Ethernet connection test application for STM32H573
+ */
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_core.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/ethernet.h>
 #include <zephyr/logging/log.h>
 
-/**
- * @brief Basic Ethernet connection test application for STM32H573
- */
 #define MAC_ADDR_LEN 6
 
 LOG_MODULE_REGISTER(eth_basic, LOG_LEVEL_INF);
