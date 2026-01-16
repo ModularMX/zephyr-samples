@@ -12,6 +12,10 @@ int main(void)
 
     LOG_INF("=== STM32H573 Ethernet Basic Connection Test ===");
 
+    /* Give PHY time to negotiate link (typically ~1 second) */
+    LOG_INF("Waiting for PHY to negotiate link...");
+    k_sleep(K_SECONDS(2));
+
     /* Get the default network interface */
     iface = net_if_get_default();
     if (!iface)
@@ -50,3 +54,4 @@ int main(void)
 
     return 0;
 }
+
