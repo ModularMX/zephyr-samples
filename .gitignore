@@ -2,4 +2,8 @@ storage
 data_structures
 kernel/MAILBOXES
 hal_drivers/INTERRUPTS
+hal_drivers/SPI
+hal_drivers/ADC
+middleware/SHELL
+middleware/SMF
 TEMP
