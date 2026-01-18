@@ -1,6 +1,5 @@
 storage
 data_structures
 kernel/MAILBOXES
-kernel/ZBUS
 hal_drivers/INTERRUPTS
 TEMP
