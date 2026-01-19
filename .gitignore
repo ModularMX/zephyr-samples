@@ -1,6 +1,11 @@
-storage
-data_structures
+data_structures/HEAP
+data_structures/SLISTS
+storage/FLASH
 kernel/MAILBOXES
+kernel/EVENTS
+kernel/SEMAPHORES
+kernel/MUTEXES
+kernel/PIPES
 hal_drivers/INTERRUPTS
 hal_drivers/SPI
 hal_drivers/ADC
