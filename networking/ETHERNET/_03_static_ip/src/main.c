@@ -9,11 +9,15 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/ethernet.h>
 #include <zephyr/net/phy.h>
+#include <zephyr/net/net_mgmt.h>
 #include <zephyr/logging/log.h>
 
 #define MAC_ADDR_LEN 6
 
 LOG_MODULE_REGISTER(eth_static, LOG_LEVEL_INF);
+
+// Event callback structure - used to listen for IP address changes
+static struct net_mgmt_event_callback mgmt_cb;
 
 /**
  * @brief Assign static IP address to interface
@@ -74,6 +78,54 @@ static void phy_link_state_changed(const struct device *phy_dev,
     }
 }
 
+/**
+ * Handle NET_EVENT_IPV4_ADDR_ADD event
+ *
+ * Notifies when a static IP address is successfully assigned to the interface.
+ */
+static void ip_event_handler(struct net_mgmt_event_callback *cb,
+                             uint64_t mgmt_event,
+                             struct net_if *iface)
+{
+    int i = 0;
+
+    // Only handle IP address add events
+    if (mgmt_event != NET_EVENT_IPV4_ADDR_ADD)
+    {
+        return;
+    }
+
+    // Iterate through all IPv4 addresses on this interface
+    for (i = 0; i < NET_IF_MAX_IPV4_ADDR; i++)
+    {
+        char buf[NET_IPV4_ADDR_LEN];
+
+        // Skip addresses that are not manually assigned
+        if (iface->config.ip.ipv4->unicast[i].ipv4.addr_type != NET_ADDR_MANUAL)
+        {
+            continue;
+        }
+
+        // Log the assigned static IP address
+        LOG_INF("IP Address: %s",
+                net_addr_ntop(NET_AF_INET,
+                              &iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
+                              buf, sizeof(buf)));
+
+        // Log the subnet mask
+        LOG_INF("Netmask:    %s",
+                net_addr_ntop(NET_AF_INET,
+                              &iface->config.ip.ipv4->unicast[i].netmask,
+                              buf, sizeof(buf)));
+
+        // Log the default gateway
+        LOG_INF("Gateway:    %s",
+                net_addr_ntop(NET_AF_INET,
+                              &iface->config.ip.ipv4->gw,
+                              buf, sizeof(buf)));
+    }
+}
+
 int main(void)
 {
     struct net_if *iface;
@@ -87,6 +139,10 @@ int main(void)
     }
 
     LOG_INF("Network interface found: %p", iface);
+
+    // Register callback to be notified when an IPv4 address is assigned
+    net_mgmt_init_event_callback(&mgmt_cb, ip_event_handler, NET_EVENT_IPV4_ADDR_ADD);
+    net_mgmt_add_event_callback(&mgmt_cb);
 
     // Get and display MAC address
     const struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
