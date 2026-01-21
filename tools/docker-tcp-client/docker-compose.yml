@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  tcp-client:
+    build: .
+    container_name: tcp-client
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - eth_network
+
+networks:
+  eth_network:
+    driver: bridge
