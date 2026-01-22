@@ -2,7 +2,6 @@ data_structures/HEAP
 data_structures/SLISTS
 storage/FLASH
 kernel/MAILBOXES
-kernel/EVENTS
 kernel/SEMAPHORES
 kernel/MUTEXES
 kernel/PIPES
