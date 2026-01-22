@@ -83,6 +83,9 @@ static void ip_event_handler(struct net_mgmt_event_callback *cb,
 static void udp_receive(void)
 {
     struct sockaddr_in addr;
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    char client_ip[NET_IPV4_ADDR_LEN];
     int received;
 
     LOG_INF("Creating UDP socket...");
@@ -111,7 +114,8 @@ static void udp_receive(void)
 
     while (1)
     {
-        received = recv(sock, recv_buf, sizeof(recv_buf) - 1, 0);
+        received = recvfrom(sock, recv_buf, sizeof(recv_buf) - 1, 0,
+                            (struct sockaddr *)&client_addr, &client_addr_len);
 
         if (received < 0)
         {
@@ -126,7 +130,13 @@ static void udp_receive(void)
         }
 
         recv_buf[received] = '\0';
-        LOG_INF("Received %d bytes: %s", received, (char *)recv_buf);
+
+        // Convert sender IP to string
+        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
+
+        LOG_INF("Received %d bytes from %s:%d",
+                received, client_ip, ntohs(client_addr.sin_port));
+        LOG_INF("  Data: %s", (char *)recv_buf);
     }
 
     close(sock);

@@ -1,70 +1,52 @@
 # UDP Receiver Example
 
-Simple UDP receiver that listens for incoming packets with static IP configuration. This is the counterpart to the UDP Sender example (_07_udp_sender).
+Simple UDP receiver that listens for incoming packets with static IP configuration.
 
 ## Features
 
 - Static IP address configuration
-- UDP socket creation with bind()
-- Receive incoming datagrams using recvfrom()
+- UDP socket with `bind()` and `recvfrom()`
 - Display sender information (IP, port, data)
-- Board-agnostic implementation
-
-## Architecture
-
-### Comparison with Sender
-
-| Aspect | Sender (_07) | Receiver (_08) |
-|--------|--------------|----------------|
-| Socket Operation | `connect()` → `send()` | `bind()` → `recvfrom()` |
-| Board IP | 192.168.1.100 | 192.168.1.200 |
-| Role | Sends packets | Receives packets |
-| Target | External server | Local port 4242 |
+- Waits for network connection before listening
 
 ## Configuration
 
-Edit `src/main.c` to customize:
+Edit `src/main.c`:
 
 ```c
-#define LOCAL_PORT 4242                    // UDP port to bind to
-#define BOARD_IP htonl(...)                // Your board's static IP (192.168.1.200)
-#define BOARD_IP_MASK 24                   // Netmask: /24 (255.255.255.0)
-#define BUFFER_SIZE 256                    // Max datagram size
+#define LOCAL_PORT 4242                    // UDP port to listen on
+#define BOARD_IP_ADDR htonl((192UL << 24) | (168UL << 16) | (1UL << 8) | 100UL)
+#define BOARD_IP_MASK 24
 ```
 
-## Usage
+## Build & Flash
 
-### Build
 ```bash
 west build -b stm32h573i_dk apps/networking/ETHERNET/_08_udp_receiver
-```
-
-### Flash
-```bash
 west flash
 ```
 
-## Testing
+## Testing with Python
 
-### Test with Sender Example
-1. Flash receiver to one board (or run in Docker)
-2. Flash sender to another board (or use Python sender)
-3. Both send and receive on 192.168.1.1 network
-4. Monitor serial console to see packets arriving
-
-
-### Expected Output (Serial Console)
+**Terminal 1 - Serial monitor:**
+```bash
+python -m serial.tools.miniterm COM3 115200
 ```
-[eth_udp_receiver] =
-== UDP Receiver ===
-[eth_udp_receiver] Creating UDP socket...
-[eth_udp_receiver] Socket created
-[eth_udp_receiver] Binding to port 4242...
-[eth_udp_receiver] Socket bound to 0.0.0.0:4242
-[eth_udp_receiver] Waiting for UDP packets... (Ctrl+C to stop)
-[eth_udp_receiver] Packet #1 received from 192.168.1.100:12345 (34 bytes)
-[eth_udp_receiver]   Data: 'Hello from Zephyr UDP! [packet #0]'
+
+**Terminal 2 - Send UDP packets:**
+```bash
+python apps/tools/udp-sender-test/udp_sender_test.py
 ```
+
+**Expected output:**
+```
+[eth_udp_receiver] Received 34 bytes from 192.168.1.1:12345
+[eth_udp_receiver]   Data: Hello from Python UDP! [packet #0]
+```
+
+## References
+
+- [Zephyr Networking](https://docs.zephyrproject.org/latest/connectivity/networking/index.html)
 
 ## Key Code Patterns
 
