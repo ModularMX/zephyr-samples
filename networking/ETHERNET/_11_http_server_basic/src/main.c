@@ -1,10 +1,11 @@
 // HTTP Server Example for Zephyr
-// Simple HTTP server with static and dynamic resources
+// "Hello World" - Simple HTTP server with device info and echo endpoints
 //
 // SPDX-License-Identifier: Apache-2.0
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/http/server.h>
@@ -69,6 +70,54 @@ static struct http_resource_detail_static main_js_resource_detail = {
 // =============================================================================
 // DYNAMIC RESOURCE HANDLERS
 // =============================================================================
+
+// Device info handler - returns device information as JSON
+// Client sends: GET /device-info
+// Server responds: JSON with board, architecture, uptime, status
+static int device_info_handler(struct http_client_ctx *client, enum http_data_status status,
+							   const struct http_request_ctx *request_ctx,
+							   struct http_response_ctx *response_ctx, void *user_data)
+{
+	// Buffer for JSON response
+	static char info_buf[256];
+	int len;
+
+	LOG_DBG("Device info handler called, status: %d", status);
+
+	// Wait for all request data to be received before responding
+	if (status == HTTP_SERVER_DATA_FINAL)
+	{
+		// Build JSON response with device information
+		len = snprintf(info_buf, sizeof(info_buf),
+					   "{\"board\":\"STM32H573I-DK\","
+					   "\"arch\":\"ARM Cortex-M33\","
+					   "\"uptime\":%" PRId64 ","
+					   "\"status\":\"Running\"}",
+					   k_uptime_get());
+
+		if (len < 0 || len >= (int)sizeof(info_buf))
+		{
+			LOG_ERR("Failed to format device info");
+			return -ENOMEM;
+		}
+
+		// Set response body and mark as complete
+		response_ctx->body = (uint8_t *)info_buf;
+		response_ctx->body_len = len;
+		response_ctx->final_chunk = true;
+	}
+
+	return 0;
+}
+
+static struct http_resource_detail_dynamic device_info_resource_detail = {
+	.common = {
+		.type = HTTP_RESOURCE_TYPE_DYNAMIC,
+		.bitmask_of_supported_http_methods = BIT(HTTP_GET),
+	},
+	.cb = device_info_handler,
+	.user_data = NULL,
+};
 
 // Uptime handler - returns device uptime in milliseconds
 // Client sends: GET /uptime
@@ -171,8 +220,8 @@ HTTP_RESOURCE_DEFINE(index_resource, http_service, "/", &index_html_resource_det
 // Route "/main.js" -> static JavaScript
 HTTP_RESOURCE_DEFINE(main_js_resource, http_service, "/main.js", &main_js_resource_detail);
 
-// Route "/uptime" -> dynamic endpoint (calls uptime_handler)
-HTTP_RESOURCE_DEFINE(uptime_resource, http_service, "/uptime", &uptime_resource_detail);
+// Route "/device-info" -> dynamic endpoint (calls device_info_handler)
+HTTP_RESOURCE_DEFINE(device_info_resource, http_service, "/device-info", &device_info_resource_detail);
 
 // Route "/echo" -> dynamic endpoint (echoes back data)
 HTTP_RESOURCE_DEFINE(echo_resource, http_service, "/echo", &echo_resource_detail);
@@ -187,7 +236,7 @@ int main(void)
 	LOG_INF("Available endpoints:");
 	LOG_INF("  GET  /              -> HTML page");
 	LOG_INF("  GET  /main.js       -> JavaScript");
-	LOG_INF("  GET  /uptime        -> Device uptime");
+	LOG_INF("  GET  /device-info   -> Device information (JSON)");
 	LOG_INF("  GET/POST /echo      -> Echo server");
 	
 	// Start the HTTP server (blocking call)
