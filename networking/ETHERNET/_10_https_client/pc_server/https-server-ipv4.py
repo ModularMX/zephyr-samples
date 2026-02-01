@@ -12,11 +12,13 @@ PORT = 4443
 
 class RequestHandler(SimpleHTTPRequestHandler):
     length = 0
+    protocol_version = 'HTTP/1.1'  # Enable persistent connections
 
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-Type', 'text/html')
         self.send_header('Content-Length', str(self.length))
+        self.send_header('Connection', 'close')  # Close after each request
         self.end_headers()
 
     def do_GET(self):
@@ -25,13 +27,21 @@ class RequestHandler(SimpleHTTPRequestHandler):
         self.length = len(payload)
         self._set_headers()
         self.wfile.write(payload)
+        self.wfile.flush()
 
     def do_POST(self):
         """Handle POST request"""
+        # Read POST data
+        content_length = self.headers.get('Content-Length')
+        if content_length:
+            post_data = self.rfile.read(int(content_length))
+            print(f"[POST] Received {len(post_data)} bytes: {post_data[:100]}")
+        
         payload = b"<html><p>POST response from HTTPS Server - Done</p></html>"
         self.length = len(payload)
         self._set_headers()
         self.wfile.write(payload)
+        self.wfile.flush()
 
     def log_message(self, format, *args):
         """Log incoming requests"""
