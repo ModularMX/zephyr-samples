@@ -23,23 +23,23 @@ Netmask:     255.255.255.0
 
 ```
 *** Booting Zephyr OS build v4.3.0-2952-ge855856a5d63 ***
-[00:00:00.061,000] <inf> eth_static: Network interface found: 0x20001088
-[00:00:00.069,000] <inf> eth_static: MAC Address: 02:80:E1:26:6D:D5
-[00:00:00.077,000] <inf> eth_static: Interface type: ethernet
-[00:00:00.085,000] <inf> eth_static: PHY device found: eth_stm32_hal
-[00:00:00.092,000] <inf> eth_static: Registering PHY link state callback...
-[00:00:00.101,000] <inf> eth_static: PHY callback registered successfully
+Network interface found: 0x20001088
+MAC Address: 02:80:E1:26:6D:D5
+Interface type: ethernet
+PHY device found: eth_stm32_hal
+Registering PHY link state callback...
+PHY callback registered successfully
 [00:00:01.556,000] <inf> phy_mii: PHY (0) Link speed 100 Mb, full duplex
-[00:00:01.564,000] <inf> eth_static: >>> LINK UP - Cable connected!
-[00:00:01.571,000] <inf> eth_static: Static IP assigned: 192.168.1.100
-[00:00:01.580,000] <inf> eth_static: IP Address: 192.168.1.100
-[00:00:01.587,000] <inf> eth_static: Netmask:    255.255.255.0
-[00:00:05.456,000] <inf> eth_static: >>> LINK DOWN - Cable disconnected!
-[00:00:05.462,000] <inf> eth_static: Static IP removed
-[00:00:08.789,000] <inf> eth_static: >>> LINK UP - Cable connected!
-[00:00:08.796,000] <inf> eth_static: Static IP assigned: 192.168.1.100
-[00:00:08.805,000] <inf> eth_static: IP Address: 192.168.1.100
-[00:00:08.812,000] <inf> eth_static: Netmask:    255.255.255.0
+>>> LINK UP - Cable connected!
+Static IP assigned: 192.168.1.100
+IP Address: 192.168.1.100
+Netmask:    255.255.255.0
+>>> LINK DOWN - Cable disconnected!
+Static IP removed
+>>> LINK UP - Cable connected!
+Static IP assigned: 192.168.1.100
+IP Address: 192.168.1.100
+Netmask:    255.255.255.0
 ```
 
 ## How to test it

@@ -10,12 +10,12 @@
  * Result: The device gets an IP, netmask, gateway, and lease time automatically.
  */
 
-#include <zephyr/logging/log.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
 
-LOG_MODULE_REGISTER(eth_dhcp_client, LOG_LEVEL_INF);
+
 
 // DHCP Option 42: NTP Server address (for time synchronization)
 #define DHCP_OPTION_NTP (42)
@@ -39,9 +39,9 @@ static void start_dhcpv4_client(struct net_if *iface, void *user_data)
     ARG_UNUSED(user_data);
 
     // Log which interface we're starting DHCP on
-    LOG_INF("Starting DHCP on %s (index %d)",
-            net_if_get_device(iface)->name,
-            net_if_get_by_iface(iface));
+	printk("Starting DHCP on %s (index %d)\n",
+		net_if_get_device(iface)->name,
+		net_if_get_by_iface(iface));
 
     // Initiate the DHCP protocol sequence
     net_dhcpv4_start(iface);
@@ -77,27 +77,27 @@ static void handler(struct net_mgmt_event_callback *cb,
         }
 
         // Log the assigned IP address
-        LOG_INF("IP Address: %s",
-                net_addr_ntop(NET_AF_INET,
-                              &iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
-                              buf, sizeof(buf)));
+    		printk("IP Address: %s\n",
+    			net_addr_ntop(NET_AF_INET,
+    						&iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
+    						buf, sizeof(buf)));
 
         // Log the subnet mask
-        LOG_INF("Netmask:    %s",
-                net_addr_ntop(NET_AF_INET,
-                              &iface->config.ip.ipv4->unicast[i].netmask,
-                              buf, sizeof(buf)));
+    		printk("Netmask:    %s\n",
+    			net_addr_ntop(NET_AF_INET,
+    						&iface->config.ip.ipv4->unicast[i].netmask,
+    						buf, sizeof(buf)));
 
         // Log the default gateway
-        LOG_INF("Gateway:    %s",
-                net_addr_ntop(NET_AF_INET,
-                              &iface->config.ip.ipv4->gw,
-                              buf, sizeof(buf)));
+    		printk("Gateway:    %s\n",
+    			net_addr_ntop(NET_AF_INET,
+    						&iface->config.ip.ipv4->gw,
+    						buf, sizeof(buf)));
 
         // Log lease duration: how long until we need to renew the IP
-        LOG_INF("Lease time: %u seconds (%u days)",
-                iface->config.dhcpv4.lease_time,
-                iface->config.dhcpv4.lease_time / 86400);
+    		printk("Lease time: %u seconds (%u days)\n",
+    			iface->config.dhcpv4.lease_time,
+    			iface->config.dhcpv4.lease_time / 86400);
     }
 }
 
@@ -115,15 +115,15 @@ static void option_handler(struct net_dhcpv4_option_callback *cb,
     char buf[NET_IPV4_ADDR_LEN];
 
     // Convert the option data to human-readable IP address format
-    LOG_INF("DHCP Option %d: %s",
-            cb->option,
-            net_addr_ntop(NET_AF_INET, cb->data, buf, sizeof(buf)));
+	printk("DHCP Option %d: %s\n",
+		cb->option,
+		net_addr_ntop(NET_AF_INET, cb->data, buf, sizeof(buf)));
 }
 
 int main(void)
 {
-    LOG_INF("STM32H573 DHCP Client");
-    LOG_INF("Waiting for network interface...");
+	printk("STM32H573 DHCP Client\n");
+	printk("Waiting for network interface...\n");
 
     // Register callback to be notified when an IPv4 address is assigned
     net_mgmt_init_event_callback(&mgmt_cb, handler, NET_EVENT_IPV4_ADDR_ADD);

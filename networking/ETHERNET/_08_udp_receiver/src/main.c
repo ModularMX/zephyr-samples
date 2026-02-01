@@ -5,7 +5,7 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
+
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
 #include <zephyr/net/socket.h>
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <errno.h>
 
-LOG_MODULE_REGISTER(eth_udp_receiver, LOG_LEVEL_INF);
+
 
 // ============================================================================
 // UDP SERVER CONFIGURATION - Customize these values for your setup
@@ -51,13 +51,13 @@ static void assign_static_ip(struct net_if *iface)
 
     if (!ifaddr)
     {
-        LOG_ERR("Failed to add IPv4 address");
+		printk("Failed to add IPv4 address\n");
         return;
     }
 
-    LOG_INF("Board IP assigned: %s/%d",
-            net_addr_ntop(NET_AF_INET, &addr, buf, sizeof(buf)),
-            BOARD_IP_MASK);
+	printk("Board IP assigned: %s/%d\n",
+		net_addr_ntop(NET_AF_INET, &addr, buf, sizeof(buf)),
+		BOARD_IP_MASK);
 }
 
 /**
@@ -72,7 +72,7 @@ static void ip_event_handler(struct net_mgmt_event_callback *cb,
         return;
     }
 
-    LOG_INF("IPv4 address event received");
+	printk("IPv4 address event received\n");
 }
 
 /**
@@ -88,15 +88,15 @@ static void udp_receive(void)
     char client_ip[NET_IPV4_ADDR_LEN];
     int received;
 
-    LOG_INF("Creating UDP socket...");
+	printk("Creating UDP socket...\n");
 
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock < 0)
     {
-        LOG_ERR("Failed to create socket: errno %d, %s", errno, strerror(errno));
+		printk("Failed to create socket: errno %d, %s\n", errno, strerror(errno));
         return;
     }
-    LOG_INF("Socket created successfully");
+	printk("Socket created successfully\n");
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -105,12 +105,12 @@ static void udp_receive(void)
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
-        LOG_ERR("Failed to bind socket: errno %d, %s", errno, strerror(errno));
+		printk("Failed to bind socket: errno %d, %s\n", errno, strerror(errno));
         close(sock);
         return;
     }
-    LOG_INF("Socket bound to 0.0.0.0:%d", LOCAL_PORT);
-    LOG_INF("Listening for UDP packets...");
+	printk("Socket bound to 0.0.0.0:%d\n", LOCAL_PORT);
+	printk("Listening for UDP packets...\n");
 
     while (1)
     {
@@ -119,13 +119,13 @@ static void udp_receive(void)
 
         if (received < 0)
         {
-            LOG_ERR("Socket error: %d", errno);
+			printk("Socket error: %d\n", errno);
             break;
         }
 
         if (received == 0)
         {
-            LOG_WRN("Empty datagram");
+			printk("Empty datagram\n");
             continue;
         }
 
@@ -134,9 +134,9 @@ static void udp_receive(void)
         // Convert sender IP to string
         inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
 
-        LOG_INF("Received %d bytes from %s:%d",
-                received, client_ip, ntohs(client_addr.sin_port));
-        LOG_INF("  Data: %s", (char *)recv_buf);
+    		printk("Received %d bytes from %s:%d\n",
+    			received, client_ip, ntohs(client_addr.sin_port));
+    		printk("  Data: %s\n", (char *)recv_buf);
     }
 
     close(sock);
@@ -146,17 +146,17 @@ int main(void)
 {
     struct net_if *iface;
 
-    LOG_INF("UDP Receiver with Static IP");
+	printk("UDP Receiver with Static IP\n");
 
     // Get the default network interface
     iface = net_if_get_default();
     if (!iface)
     {
-        LOG_ERR("ERROR: No network interface found!");
+		printk("ERROR: No network interface found!\n");
         return 1;
     }
 
-    LOG_INF("Network interface found");
+	printk("Network interface found\n");
 
     // Register callback to be notified when an IPv4 address is assigned
     net_mgmt_init_event_callback(&mgmt_cb, ip_event_handler, NET_EVENT_IPV4_ADDR_ADD);

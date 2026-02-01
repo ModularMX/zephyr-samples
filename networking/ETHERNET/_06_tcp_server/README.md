@@ -79,21 +79,21 @@ This will:
 
 **Expected board output:**
 ```
-[00:00:00.xxx,000] <inf> eth_tcp_server: TCP Server with Static IP
-[00:00:00.xxx,000] <inf> eth_tcp_server: Network interface found
-[00:00:01.xxx,000] <inf> eth_tcp_server: Static IP assigned: 192.168.1.100/24
-[00:00:02.xxx,000] <inf> eth_tcp_server: Creating TCP server socket...
-[00:00:02.xxx,000] <inf> eth_tcp_server: Server socket created successfully
-[00:00:02.xxx,000] <inf> eth_tcp_server: Binding to port 5555...
-[00:00:02.xxx,000] <inf> eth_tcp_server: Socket bound successfully
-[00:00:02.xxx,000] <inf> eth_tcp_server: Listening for incoming connections...
-[00:00:02.xxx,000] <inf> eth_tcp_server: Server listening on 0.0.0.0:5555
+TCP Server with Static IP
+Network interface found
+Static IP assigned: 192.168.1.100/24
+Creating TCP server socket...
+Server socket created successfully
+Binding to port 5555...
+Socket bound successfully
+Listening for incoming connections...
+Server listening on 0.0.0.0:5555
 
-[00:00:XX.xxx,000] <inf> eth_tcp_server: Client connected: 192.168.1.50:xxxxx
-[00:00:XX.xxx,000] <inf> eth_tcp_server: Received (18 bytes): 'Hello from Zephyr!'
-[00:00:XX.xxx,000] <inf> eth_tcp_server: Echoed (18 bytes) back to client
-[00:00:XX.xxx,000] <inf> eth_tcp_server: Client disconnected
-[00:00:XX.xxx,000] <inf> eth_tcp_server: Client socket closed
+Client connected: 192.168.1.50:xxxxx
+Received (18 bytes): 'Hello from Zephyr!'
+Echoed (18 bytes) back to client
+Client disconnected
+Client socket closed
 ```
 
 ## Network Architecture

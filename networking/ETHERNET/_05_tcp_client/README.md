@@ -40,22 +40,22 @@ python -m serial.tools.miniterm COM3 115200 --eol LF
 
 **Expected board output:**
 ```
-[00:00:00.xxx,000] <inf> eth_tcp_client: TCP Client with Static IP
-[00:00:00.xxx,000] <inf> eth_tcp_client: Network interface found
-[00:00:01.xxx,000] <inf> eth_tcp_client: Static IP assigned: 192.168.1.100/24
-[00:00:02.xxx,000] <inf> eth_tcp_client: Ready to connect to TCP server!
-[00:00:02.xxx,000] <inf> eth_tcp_client: Creating TCP socket...
-[00:00:02.xxx,000] <inf> eth_tcp_client: Socket created successfully
-[00:00:02.xxx,000] <inf> eth_tcp_client: Connecting to server...
-[00:00:02.xxx,000] <inf> eth_tcp_client: Connected to server!
-[00:00:02.xxx,000] <inf> eth_tcp_client: Sending: 'Hello from Zephyr!'
-[00:00:02.xxx,000] <inf> eth_tcp_client: Data sent (18 bytes)
-[00:00:02.xxx,000] <inf> eth_tcp_client: Waiting for response...
-[00:00:02.xxx,000] <inf> eth_tcp_client: Received (18 bytes): 'Hello from Zephyr!'
-[00:00:02.xxx,000] <inf> eth_tcp_client: Connection closed
+TCP Client with Static IP
+Network interface found
+Static IP assigned: 192.168.1.100/24
+Ready to connect to TCP server!
+Creating TCP socket...
+Socket created successfully
+Connecting to server...
+Connected to server!
+Sending: 'Hello from Zephyr!'
+Data sent (18 bytes)
+Waiting for response...
+Received (18 bytes): 'Hello from Zephyr!'
+Connection closed
 ```
 
-**Expected Docker output:**
+**Expected Script output:**
 ```
 [CONNECTED] Client connected from 172.18.0.1:xxxxx
 [RECEIVED] (18 bytes): 'Hello from Zephyr!'

@@ -18,7 +18,7 @@
  *
  */
 
-#include <zephyr/logging/log.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
@@ -31,7 +31,7 @@
 #include <string.h>
 #include <errno.h>
 
-LOG_MODULE_REGISTER(eth_udp_sender, LOG_LEVEL_INF);
+
 
 // ============================================================================
 // UDP SERVER CONFIGURATION - Customize these values for your setup
@@ -78,13 +78,13 @@ static void assign_static_ip(struct net_if *iface)
 
     if (!ifaddr)
     {
-        LOG_ERR("Failed to add IPv4 address");
+		printk("Failed to add IPv4 address\n");
         return;
     }
 
-    LOG_INF("Board IP assigned: %s/%d",
-            net_addr_ntop(NET_AF_INET, &addr, buf, sizeof(buf)),
-            BOARD_IP_MASK);
+	printk("Board IP assigned: %s/%d\n",
+		net_addr_ntop(NET_AF_INET, &addr, buf, sizeof(buf)),
+		BOARD_IP_MASK);
 }
 
 /**
@@ -99,7 +99,7 @@ static void ip_event_handler(struct net_mgmt_event_callback *cb,
         return;
     }
 
-    LOG_INF("IPv4 address event received");
+	printk("IPv4 address event received\n");
 }
 
 /**
@@ -115,16 +115,16 @@ static void udp_send_packets(void)
     static uint32_t packet_count = 0;
     char buffer[256];
 
-    LOG_INF("Creating UDP socket...");
+	printk("Creating UDP socket...\n");
 
     // Create a UDP socket with IPPROTO_UDP
     udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (udp_socket < 0)
     {
-        LOG_ERR("Failed to create socket: errno %d, %s", errno, strerror(errno));
+		printk("Failed to create socket: errno %d, %s\n", errno, strerror(errno));
         return;
     }
-    LOG_INF("Socket created successfully");
+	printk("Socket created successfully\n");
 
     // Prepare the server address structure - MUST use inet_pton, not inet_addr
     memset(&server_addr, 0, sizeof(server_addr));
@@ -134,27 +134,27 @@ static void udp_send_packets(void)
     ret = inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
     if (ret <= 0)
     {
-        LOG_ERR("Invalid server address: %s (inet_pton returned %d)", SERVER_ADDR, ret);
+		printk("Invalid server address: %s (inet_pton returned %d)\n", SERVER_ADDR, ret);
         close(udp_socket);
         return;
     }
 
-    LOG_INF("Server address: %s:%d", SERVER_ADDR, SERVER_PORT);
+	printk("Server address: %s:%d\n", SERVER_ADDR, SERVER_PORT);
 
     // Connect UDP socket - Zephyr REQUIRES this for UDP
-    LOG_INF("Connecting UDP socket...");
+	printk("Connecting UDP socket...\n");
     ret = connect(udp_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret < 0)
     {
-        LOG_ERR("Connect failed: errno %d, %s", errno, strerror(errno));
+		printk("Connect failed: errno %d, %s\n", errno, strerror(errno));
         close(udp_socket);
         udp_socket = -1;
         return;
     }
-    LOG_INF("UDP socket connected!");
+	printk("UDP socket connected!\n");
 
     // Send packets periodically
-    LOG_INF("Starting UDP send loop (every %dms)...", SEND_INTERVAL_MS);
+	printk("Starting UDP send loop (every %dms)...\n", SEND_INTERVAL_MS);
 
     for (int i = 0; i < 10; i++)
     {
@@ -166,11 +166,11 @@ static void udp_send_packets(void)
 
         if (ret < 0)
         {
-            LOG_ERR("Send failed: errno %d", errno);
+			printk("Send failed: errno %d\n", errno);
             break;
         }
 
-        LOG_INF("UDP packet #%u sent (%d bytes)", packet_count - 1, ret);
+		printk("UDP packet #%u sent (%d bytes)\n", packet_count - 1, ret);
 
         // Wait before sending next packet
         k_msleep(SEND_INTERVAL_MS);
@@ -179,24 +179,24 @@ static void udp_send_packets(void)
     // Close the socket
     close(udp_socket);
     udp_socket = -1;
-    LOG_INF("UDP socket closed");
+	printk("UDP socket closed\n");
 }
 
 int main(void)
 {
     struct net_if *iface;
 
-    LOG_INF("UDP Sender with Static IP");
+	printk("UDP Sender with Static IP\n");
 
     // Get the default network interface
     iface = net_if_get_default();
     if (!iface)
     {
-        LOG_ERR("ERROR: No network interface found!");
+		printk("ERROR: No network interface found!\n");
         return 1;
     }
 
-    LOG_INF("Network interface found");
+	printk("Network interface found\n");
 
     // Register callback to be notified when an IPv4 address is assigned
     net_mgmt_init_event_callback(&mgmt_cb, ip_event_handler, NET_EVENT_IPV4_ADDR_ADD);

@@ -21,16 +21,16 @@ This example is similar to **Example 1** but uses **event callbacks** instead of
 
 ```
 *** Booting Zephyr OS build v4.3.0-2952-ge855856a5d63 ***
-[00:00:00.061,000] <inf> eth_basic: === STM32H573 Ethernet Basic Connection Test ===
-[00:00:00.069,000] <inf> eth_basic: Waiting for PHY to negotiate link...
+=== STM32H573 Ethernet Basic Connection Test ===
+Waiting for PHY to negotiate link...
 [00:00:01.556,000] <inf> phy_mii: PHY (0) Link speed 100 Mb, full duplex
-[00:00:02.089,000] <inf> eth_basic: Network interface found: 0x20001088
-[00:00:02.097,000] <inf> eth_basic: MAC Address: 02:80:E1:26:6D:D5
-[00:00:02.106,000] <inf> eth_basic: Interface type: ethernet
-[00:00:02.112,000] <inf> eth_basic: Waiting for link state changes (using callbacks, not polling)...
-[00:00:02.121,000] <inf> eth_basic: >>> LINK UP - Cable connected!
-[00:00:05.456,000] <inf> eth_basic: >>> LINK DOWN - Cable disconnected!
-[00:00:08.789,000] <inf> eth_basic: >>> LINK UP - Cable connected!
+Network interface found: 0x20001088
+MAC Address: 02:80:E1:26:6D:D5
+Interface type: ethernet
+Waiting for link state changes (using callbacks, not polling)...
+>>> LINK UP - Cable connected!
+>>> LINK DOWN - Cable disconnected!
+>>> LINK UP - Cable connected!
 ```
 
 Notice: **Changes appear instantly** when you connect/disconnect the cable (not waiting for the next 2-second poll).
@@ -56,8 +56,8 @@ Notice: **Changes appear instantly** when you connect/disconnect the cable (not 
 
 4. Test by **quickly** disconnecting/connecting the cable - you'll see **instant** responses:
    ```
-   [00:00:xx.xxx] <inf> eth_basic: >>> LINK UP - Cable connected!
-   [00:00:xx.xxx] <inf> eth_basic: >>> LINK DOWN - Cable disconnected!
+   >>> LINK UP - Cable connected!
+   >>> LINK DOWN - Cable disconnected!
    ```
 
 ## References

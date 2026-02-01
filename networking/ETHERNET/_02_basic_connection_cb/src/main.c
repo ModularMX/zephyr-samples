@@ -8,11 +8,11 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/ethernet.h>
 #include <zephyr/net/phy.h>
-#include <zephyr/logging/log.h>
+
 
 #define MAC_ADDR_LEN 6
 
-LOG_MODULE_REGISTER(eth_basic, LOG_LEVEL_INF);
+
 
 /**
  * @brief PHY link state change callback
@@ -27,11 +27,11 @@ static void phy_link_state_changed(const struct device *phy_dev,
 
     if (state->is_up)
     {
-        LOG_INF(">>> LINK UP - Cable connected!");
+		printk(">>> LINK UP - Cable connected!\n");
     }
     else
     {
-        LOG_INF(">>> LINK DOWN - Cable disconnected!");
+		printk(">>> LINK DOWN - Cable disconnected!\n");
     }
 }
 
@@ -43,45 +43,45 @@ int main(void)
     iface = net_if_get_default();
     if (!iface)
     {
-        LOG_ERR("ERROR: No network interface found!");
+		printk("ERROR: No network interface found!\n");
         return 1;
     }
 
-    LOG_INF("Network interface found: %p", iface);
+	printk("Network interface found: %p\n", iface);
 
     // Get and display MAC address
     const struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
     if (linkaddr && MAC_ADDR_LEN == linkaddr->len)
     {
-        LOG_INF("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
-                linkaddr->addr[0], linkaddr->addr[1], linkaddr->addr[2],
-                linkaddr->addr[3], linkaddr->addr[4], linkaddr->addr[5]);
+    		printk("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    			linkaddr->addr[0], linkaddr->addr[1], linkaddr->addr[2],
+    			linkaddr->addr[3], linkaddr->addr[4], linkaddr->addr[5]);
     }
     else
     {
-        LOG_WRN("Could not read MAC address");
+		printk("Could not read MAC address\n");
     }
 
     // Get interface type
-    LOG_INF("Interface type: %s", iface->if_dev->dev->name);
+	printk("Interface type: %s\n", iface->if_dev->dev->name);
 
     // Get the PHY device from the interface
     const struct device *phy_dev = net_eth_get_phy(iface);
     if (!phy_dev || !device_is_ready(phy_dev))
     {
-        LOG_ERR("ERROR: PHY device not ready!");
+		printk("ERROR: PHY device not ready!\n");
         return 1;
     }
 
-    LOG_INF("PHY device found: %s", phy_dev->name);
+	printk("PHY device found: %s\n", phy_dev->name);
 
     // Register PHY link state callback
-    LOG_INF("Registering PHY link state callback...");
+	printk("Registering PHY link state callback...\n");
     phy_link_callback_set(phy_dev, phy_link_state_changed, (void *)iface);
-    LOG_INF("PHY callback registered successfully");
+	printk("PHY callback registered successfully\n");
 
-    LOG_INF("Waiting for link state changes (callback-driven)...");
-    LOG_INF("Connect/disconnect cable to see events\n");
+	printk("Waiting for link state changes (callback-driven)...\n");
+	printk("Connect/disconnect cable to see events\n");
 
     // Just wait - callbacks will handle everything!
     while (1)

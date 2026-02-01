@@ -15,15 +15,15 @@ This example validates that the Ethernet hardware works correctly on the STM32H5
 ### Expected output:
 
 ```
-*** Booting Zephyr OS build v4.3.0-2952-ge855856a5d63 ***
-[00:00:00.061,000] <inf> eth_basic: === STM32H573 Ethernet Basic Connection Test ===
-[00:00:00.069,000] <inf> eth_basic: Waiting for PHY to negotiate link...
+*** Booting Zephyr OS build v4.3.0-2952-ge855856a5d63 *** 
+=== STM32H573 Ethernet Basic Connection Test ===
+Waiting for PHY to negotiate link...
 [00:00:01.556,000] <inf> phy_mii: PHY (0) Link speed 100 Mb, full duplex
-[00:00:02.089,000] <inf> eth_basic: Network interface found: 0x20001088
-[00:00:02.097,000] <inf> eth_basic: MAC Address: 02:80:E1:26:6D:D5
-[00:00:02.106,000] <inf> eth_basic: Interface type: ethernet
-[00:00:02.112,000] <inf> eth_basic: Starting link state polling (checking every 2 seconds)...
-[00:00:02.121,000] <inf> eth_basic: >>> LINK UP - Cable connected!
+Network interface found: 0x20001088
+MAC Address: 02:80:E1:26:6D:D5
+Interface type: ethernet
+Starting link state polling (checking every 2 seconds)...
+>>> LINK UP - Cable connected!
 ```
 
 ## How to test it
@@ -47,8 +47,8 @@ This example validates that the Ethernet hardware works correctly on the STM32H5
 
 4. Test by disconnecting/connecting the cable - you'll see:
    ```
-   [00:00:xx.xxx] <inf> eth_basic: >>> LINK UP - Cable connected!
-   [00:00:xx.xxx] <inf> eth_basic: >>> LINK DOWN - Cable disconnected!
+   >>> LINK UP - Cable connected!
+   >>> LINK DOWN - Cable disconnected!
    ```
 
 ## Ethernet Concepts for Beginners
