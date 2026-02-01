@@ -86,14 +86,14 @@ To connect to a different server:
 
 ## Testing with a Local HTTPS Server
 
-You can test this example using the net-tools server that comes with Zephyr:
+This example includes a Python HTTPS server for testing. To run it:
 
 ```bash
-cd zephyr/samples/net/sockets/http_client
-./../../common/net-tools/https-server.sh
+cd pc_server
+python https-server-ipv4.py
 ```
 
-This will start an HTTPS server on 192.168.1.1:4443 using the test certificate.
+This will start an HTTPS server on 0.0.0.0:4443 (listening on all interfaces) using the included test certificate. The server supports both GET and POST requests and is compatible with TLS 1.2.
 
 ## References
 
