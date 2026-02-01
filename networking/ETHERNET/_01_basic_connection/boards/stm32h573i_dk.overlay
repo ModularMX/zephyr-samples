@@ -1,0 +1,23 @@
+
+/*
+ * Ethernet configuration for STM32H573I-DK:
+ *
+ * The pinctrl and PHY configuration for RMII is already defined in the board's .dtsi files:
+ *   - &mac node sets the correct RMII pins and links to the PHY
+ *   - &mdio node sets the MDIO/MDC pins and defines the PHY
+ *
+ * You do NOT need to redefine pinctrl-0 or eth_pins_a here.
+ * Only override if you use a different PHY or need custom settings.
+ */
+
+/* Example: Override PHY handle if needed
+&mac {
+	phy-handle = <&ethphy0>;
+};
+
+&ethphy0 {
+	reg = <0>;
+	compatible = "ethernet-phy-ieee802.3-c22";
+};
+*/
+
