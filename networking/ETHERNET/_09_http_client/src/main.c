@@ -1,16 +1,28 @@
+
 /*
  * Simple HTTP Client Example for Zephyr
  * Based on Zephyr's http_client sample, simplified and using printk
+ * Assigns static IP and waits for network connectivity before HTTP request
  */
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/socket.h>
+#include <zephyr/posix/sys/socket.h>
 #include <zephyr/net/http/client.h>
 #include <zephyr/net/net_ip.h>
+#include <zephyr/net/net_if.h>
+#include <zephyr/net/net_core.h>
+#include <zephyr/net/ethernet.h>
+#include <zephyr/net/phy.h>
+
+#include <zephyr/net/net_mgmt.h>
+#include <zephyr/posix/arpa/inet.h> // for inet_pton
+#include <zephyr/posix/unistd.h>    // for close
 #include <string.h>
 #include <stdio.h>
+#include "net_sample_common.h"
 
-#define SERVER_IP "192.168.1.100" // Change to your PC/server IP
+#define SERVER_IP "192.168.1.1" // Change to your PC/server IP
 #define SERVER_PORT 8000
 #define RECV_BUF_SIZE 512
 
@@ -18,24 +30,33 @@ static uint8_t recv_buf[RECV_BUF_SIZE];
 
 static int response_cb(struct http_response *rsp, enum http_final_call final_data, void *user_data)
 {
-    if (final_data == HTTP_DATA_MORE)
+    switch (final_data)
     {
+    case HTTP_DATA_MORE:
         printk("[HTTP] Partial data received (%zd bytes)\n", rsp->data_len);
-    }
-    else if (final_data == HTTP_DATA_FINAL)
-    {
+        break;
+    case HTTP_DATA_FINAL:
         printk("[HTTP] All data received (%zd bytes)\n", rsp->data_len);
+        break;
+    default:
+        break;
     }
     printk("[HTTP] Status: %s\n", rsp->http_status);
-    if (rsp->data_len > 0)
+
+    // Print only the body fragment (may be called multiple times)
+    if (rsp->body_frag_len > 0 && rsp->body_frag_start)
     {
-        printk("[HTTP] Body: %.*s\n", (int)rsp->data_len, rsp->body);
+        printk("[HTTP] Body fragment: %.*s\n", (int)rsp->body_frag_len, rsp->body_frag_start);
     }
     return 0;
 }
 
-void main(void)
+int main(void)
 {
+
+    // Wait for network connectivity (semaphore)
+    wait_for_network();
+
     struct sockaddr_in server_addr;
     int sock = -1;
     int ret;
@@ -54,7 +75,7 @@ void main(void)
     if (sock < 0)
     {
         printk("[ERR] Failed to create socket (%d)\n", errno);
-        return;
+        return 0;
     }
 
     ret = connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
@@ -62,7 +83,7 @@ void main(void)
     {
         printk("[ERR] Failed to connect (%d)\n", errno);
         close(sock);
-        return;
+        return 0;
     }
 
     memset(&req, 0, sizeof(req));
