@@ -18,7 +18,7 @@
  * Tested on: STM32H573I-DK, Nordic nRF52, QEMU, and others
  */
 
-#include <zephyr/logging/log.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
@@ -31,7 +31,7 @@
 #include <string.h>
 #include <errno.h>
 
-LOG_MODULE_REGISTER(eth_tcp_server, LOG_LEVEL_INF);
+
 
 // ============================================================================
 // TCP SERVER CONFIGURATION - Customize these values for your setup
@@ -77,11 +77,11 @@ static void assign_static_ip(struct net_if *iface)
 
     if (!ifaddr)
     {
-        LOG_ERR("Failed to add IPv4 address");
+        printk("Failed to add IPv4 address\n");
         return;
     }
 
-    LOG_INF("Static IP assigned: 192.168.1.100/%d", BOARD_IP_MASK);
+    printk("Static IP assigned: 192.168.1.100/%d\n", BOARD_IP_MASK);
 }
 
 /**
@@ -114,24 +114,24 @@ static void ip_event_handler(struct net_mgmt_event_callback *cb,
         }
 
         // Log the assigned static IP address
-        LOG_INF("IP Address: %s",
-                net_addr_ntop(NET_AF_INET,
-                              &iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
-                              buf, sizeof(buf)));
+        printk("IP Address: %s\n",
+            net_addr_ntop(NET_AF_INET,
+                      &iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
+                      buf, sizeof(buf)));
 
         // Log the subnet mask
-        LOG_INF("Netmask:    %s",
-                net_addr_ntop(NET_AF_INET,
-                              &iface->config.ip.ipv4->unicast[i].netmask,
-                              buf, sizeof(buf)));
+        printk("Netmask:    %s\n",
+            net_addr_ntop(NET_AF_INET,
+                      &iface->config.ip.ipv4->unicast[i].netmask,
+                      buf, sizeof(buf)));
 
         // Log the gateway
-        LOG_INF("Gateway:    %s",
-                net_addr_ntop(NET_AF_INET,
-                              &iface->config.ip.ipv4->gw,
-                              buf, sizeof(buf)));
+        printk("Gateway:    %s\n",
+            net_addr_ntop(NET_AF_INET,
+                      &iface->config.ip.ipv4->gw,
+                      buf, sizeof(buf)));
 
-        LOG_INF("Ready to connect to TCP server!");
+        printk("Ready to connect to TCP server!\n");
     }
 }
 
@@ -150,7 +150,7 @@ static void handle_client(int client_socket, struct sockaddr_in *client_addr)
     // Convert client IP to string for logging
     inet_ntop(AF_INET, &client_addr->sin_addr, client_ip, INET_ADDRSTRLEN);
 
-    LOG_INF("Client connected: %s:%d", client_ip, ntohs(client_addr->sin_port));
+    printk("Client connected: %s:%d\n", client_ip, ntohs(client_addr->sin_port));
 
     // Echo loop - receive data and send it back
     while (1)
@@ -160,36 +160,36 @@ static void handle_client(int client_socket, struct sockaddr_in *client_addr)
 
         if (received < 0)
         {
-            LOG_ERR("Receive failed: %d", -errno);
+            printk("Receive failed: %d\n", -errno);
             break;
         }
 
         if (received == 0)
         {
             // Client closed connection
-            LOG_INF("Client disconnected");
+            printk("Client disconnected\n");
             break;
         }
 
         // Null-terminate the received data for logging
         recv_buffer[received] = '\0';
 
-        LOG_INF("Received (%d bytes): '%s'", received, recv_buffer);
+        printk("Received (%d bytes): '%s'\n", received, recv_buffer);
 
         // Send data back to client (echo)
         sent = send(client_socket, recv_buffer, received, 0);
         if (sent < 0)
         {
-            LOG_ERR("Send failed: %d", -errno);
+            printk("Send failed: %d\n", -errno);
             break;
         }
 
-        LOG_INF("Echoed (%d bytes) back to client", sent);
+        printk("Echoed (%d bytes) back to client\n", sent);
     }
 
     // Close client connection
     close(client_socket);
-    LOG_INF("Client socket closed\n");
+    printk("Client socket closed\n");
 }
 
 /**
@@ -206,23 +206,23 @@ static void start_tcp_server(void)
     int ret;
     int optval;
 
-    LOG_INF("Creating TCP server socket...");
+    printk("Creating TCP server socket...\n");
 
     // Create a TCP socket (AF_INET = IPv4, SOCK_STREAM = TCP)
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0)
     {
-        LOG_ERR("Failed to create socket: %d", -errno);
+        printk("Failed to create socket: %d\n", -errno);
         return;
     }
-    LOG_INF("Server socket created successfully");
+    printk("Server socket created successfully\n");
 
     // Allow socket address reuse (useful for restarts)
     optval = 1;
     ret = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     if (ret < 0)
     {
-        LOG_WRN("Failed to set SO_REUSEADDR: %d", -errno);
+        printk("Failed to set SO_REUSEADDR: %d\n", -errno);
     }
 
     // Prepare the server address structure
@@ -232,26 +232,26 @@ static void start_tcp_server(void)
     server_addr.sin_port = htons(SERVER_PORT);
 
     // Bind socket to port
-    LOG_INF("Binding to port %d...", SERVER_PORT);
+    printk("Binding to port %d...\n", SERVER_PORT);
     ret = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret < 0)
     {
-        LOG_ERR("Failed to bind socket: %d", -errno);
+        printk("Failed to bind socket: %d\n", -errno);
         close(server_socket);
         return;
     }
-    LOG_INF("Socket bound successfully");
+    printk("Socket bound successfully\n");
 
     // Listen for incoming connections
-    LOG_INF("Listening for incoming connections...");
+    printk("Listening for incoming connections...\n");
     ret = listen(server_socket, LISTEN_QUEUE_SIZE);
     if (ret < 0)
     {
-        LOG_ERR("Failed to listen on socket: %d", -errno);
+        printk("Failed to listen on socket: %d\n", -errno);
         close(server_socket);
         return;
     }
-    LOG_INF("Server listening on 0.0.0.0:%d\n", SERVER_PORT);
+    printk("Server listening on 0.0.0.0:%d\n", SERVER_PORT);
 
     // Accept and handle clients (infinite loop)
     while (1)
@@ -262,7 +262,7 @@ static void start_tcp_server(void)
 
         if (client_socket < 0)
         {
-            LOG_ERR("Failed to accept connection: %d", -errno);
+            printk("Failed to accept connection: %d\n", -errno);
             continue;
         }
 
@@ -278,17 +278,17 @@ int main(void)
 {
     struct net_if *iface;
 
-    LOG_INF("TCP Server with Static IP (Generic - compatible with all boards)");
+    printk("TCP Server with Static IP (Generic - compatible with all boards)\n");
 
     // Get the default network interface
     iface = net_if_get_default();
     if (!iface)
     {
-        LOG_ERR("ERROR: No network interface found!");
+        printk("ERROR: No network interface found!\n");
         return 1;
     }
 
-    LOG_INF("Network interface found");
+    printk("Network interface found\n");
 
     // Register callback to be notified when an IPv4 address is assigned
     net_mgmt_init_event_callback(&mgmt_cb, ip_event_handler, NET_EVENT_IPV4_ADDR_ADD);
