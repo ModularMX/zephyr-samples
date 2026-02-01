@@ -27,7 +27,7 @@ SERVER_PORT = 5555
 
 # Test messages
 MESSAGES = [
-    b'Hello from Docker!',
+    b'Hello from TCP client!',
     b'Test message 1',
     b'Test message 2',
     b'Zephyr TCP Echo',
