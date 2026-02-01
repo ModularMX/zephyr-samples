@@ -48,6 +48,31 @@ UDP receiver that listens for incoming packets.
 - Configuration updates
 - Data collection from multiple sources
 
+### _09_http_client
+HTTP client that makes GET and POST requests to an HTTP server.
+
+**Use cases:**
+- REST API communication
+- Cloud connectivity
+- Data upload/download
+- Configuration retrieval
+
+### _10_https_client
+HTTPS client that makes secure GET and POST requests using TLS/SSL encryption.
+
+**Use cases:**
+- Secure REST API communication
+- Encrypted cloud connectivity
+- Secure data transmission
+- Authenticated API calls
+
+**Features:**
+- TLS 1.2 encryption using Mbed TLS
+- Certificate-based server verification
+- Support for both GET and POST requests
+- JSON payload support
+- Server hostname validation
+
 ## Network Configuration
 
 Default: 192.168.1.100/24
