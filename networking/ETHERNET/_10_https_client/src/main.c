@@ -148,53 +148,6 @@ static int connect_tls_socket(const char *server, int port, int *sock, struct so
     return 0;
 }
 
-/**
- * @brief Test basic TCP connectivity (without TLS)
- * This helps diagnose network issues before TLS
- */
-static void test_basic_connectivity(const char *server_ip, int port)
-{
-    int sock;
-    struct sockaddr_in addr;
-    int ret;
-
-    printk("\n--- Testing Basic TCP Connectivity ---\n");
-    printk("Target: %s:%d\n", server_ip, port);
-
-    // Create plain TCP socket (no TLS)
-    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock < 0) {
-        printk("[ERR] Failed to create TCP socket (%d)\n", errno);
-        return;
-    }
-
-    // Setup address
-    memset(&addr, 0, sizeof(struct sockaddr_in));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    
-    if (inet_pton(AF_INET, server_ip, &addr.sin_addr) <= 0) {
-        printk("[ERR] Invalid IP address: %s\n", server_ip);
-        close(sock);
-        return;
-    }
-
-    // Try to connect
-    printk("[TEST] Attempting TCP connection...\n");
-    ret = connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-    
-    if (ret < 0) {
-        printk("[ERR] TCP connection failed (%d) - errno: %d\n", ret, errno);
-        printk("      This indicates network routing problem\n");
-        close(sock);
-        return;
-    }
-
-    printk("[OK] TCP connection successful!\n");
-    printk("     Network routing is working\n");
-    close(sock);
-}
-
 int main(void)
 {
     // Wait for network connectivity
@@ -207,9 +160,6 @@ int main(void)
     int32_t timeout = 3000; // ms
 
     printk("\n--- Zephyr HTTPS Client Example ---\n");
-
-    // Test basic connectivity first
-    test_basic_connectivity(SERVER_IP, SERVER_PORT);
 
     // Register CA certificate
     ret = tls_credential_add(CA_CERTIFICATE_TAG,
