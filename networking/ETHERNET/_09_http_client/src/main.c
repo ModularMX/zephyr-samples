@@ -51,10 +51,85 @@ static int response_cb(struct http_response *rsp, enum http_final_call final_dat
     return 0;
 }
 
+/**
+ * @brief Create and configure a socket for HTTP communication
+ *
+ * @param server Server IP address (string)
+ * @param port Server port
+ * @param sock Pointer to socket descriptor (output)
+ * @param addr Pointer to sockaddr_in structure (output)
+ *
+ * @return 0 on success, -1 on failure
+ */
+static int setup_socket(const char *server, int port, int *sock, struct sockaddr_in *addr)
+{
+    // Initialize address structure
+    memset(addr, 0, sizeof(struct sockaddr_in));
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+
+    // Convert IP address string to binary form
+    if (inet_pton(AF_INET, server, &addr->sin_addr) <= 0)
+    {
+        printk("[ERR] Invalid IP address: %s\n", server);
+        return -1;
+    }
+
+    // Create TCP socket
+    *sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (*sock < 0)
+    {
+        printk("[ERR] Failed to create socket (%d)\n", errno);
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Setup socket and connect to server
+ *
+ * This function combines socket creation and connection to the server.
+ * Internally calls setup_socket() and then connects.
+ *
+ * @param server Server IP address (string)
+ * @param port Server port
+ * @param sock Pointer to socket descriptor (output)
+ * @param addr Pointer to sockaddr_in structure (output)
+ *
+ * @return 0 on success, -1 on failure
+ */
+static int connect_socket(const char *server, int port, int *sock, struct sockaddr_in *addr)
+{
+    int ret;
+
+    // First setup the socket
+    ret = setup_socket(server, port, sock, addr);
+    if (ret < 0 || *sock < 0)
+    {
+        return -1;
+    }
+
+    // Then connect to server
+    ret = connect(*sock, (struct sockaddr *)addr, sizeof(struct sockaddr_in));
+    if (ret < 0)
+    {
+        printk("[ERR] Failed to connect (%d)\n", errno);
+        close(*sock);
+        *sock = -1;
+        return -1;
+    }
+
+    return 0;
+}
+
 int main(void)
 {
-
-    // Wait for network connectivity (semaphore)
+    /*
+    Dev Note: For this I have decided to use a common function to wrap network connectivity,
+    if you need more context about interface example  stounplease review previous samples.
+    */
+    // Wait for network connectivity
     wait_for_network();
 
     struct sockaddr_in server_addr;
@@ -66,26 +141,15 @@ int main(void)
     printk("\n--- Zephyr HTTP Client Example ---\n");
     printk("Connecting to %s:%d\n", SERVER_IP, SERVER_PORT);
 
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(SERVER_PORT);
-    inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr);
-
-    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock < 0)
-    {
-        printk("[ERR] Failed to create socket (%d)\n", errno);
-        return 0;
-    }
-
-    ret = connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    // ===== GET REQUEST =====
+    // Setup socket and connect
+    ret = connect_socket(SERVER_IP, SERVER_PORT, &sock, &server_addr);
     if (ret < 0)
     {
-        printk("[ERR] Failed to connect (%d)\n", errno);
-        close(sock);
         return 0;
     }
 
+    // Prepare GET request
     memset(&req, 0, sizeof(req));
     req.method = HTTP_GET;
     req.url = "/";
@@ -97,6 +161,43 @@ int main(void)
 
     printk("[HTTP] Sending GET request...\n");
     ret = http_client_req(sock, &req, timeout, "GET");
+    if (ret < 0)
+    {
+        printk("[ERR] HTTP client error %d\n", ret);
+    }
+
+    // Close GET connection
+    close(sock);
+
+    // Small delay between requests
+    k_sleep(K_MSEC(500));
+
+    // ===== POST REQUEST =====
+    // Setup new socket and connect
+    ret = connect_socket(SERVER_IP, SERVER_PORT, &sock, &server_addr);
+    if (ret < 0)
+    {
+        return 0;
+    }
+
+    // Prepare POST request
+    const char *post_payload = "{\"message\":\"Hello from Zephyr\",\"board\":\"STM32H573I-DK\"}";
+    const char *content_type = "application/json";
+
+    memset(&req, 0, sizeof(req));
+    req.method = HTTP_POST;
+    req.url = "/";
+    req.host = SERVER_IP;
+    req.protocol = "HTTP/1.1";
+    req.response = response_cb;
+    req.recv_buf = recv_buf;
+    req.recv_buf_len = sizeof(recv_buf);
+    req.content_type_value = content_type;
+    req.payload = post_payload;
+    req.payload_len = strlen(post_payload);
+
+    printk("[HTTP] Sending POST request...\n");
+    ret = http_client_req(sock, &req, timeout, "POST");
     if (ret < 0)
     {
         printk("[ERR] HTTP client error %d\n", ret);
