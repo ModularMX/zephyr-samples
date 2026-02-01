@@ -26,12 +26,12 @@ LOG_MODULE_REGISTER(http_server_sample, LOG_LEVEL_DBG);
 // =============================================================================
 
 // HTML content - compressed at build time
-static uint8_t index_html_gz[] = {
+static const uint8_t index_html_gz[] = {
 #include "index.html.gz.inc"
 };
 
 // JavaScript content - compressed at build time
-static uint8_t main_js_gz[] = {
+static const uint8_t main_js_gz[] = {
 #include "main.js.gz.inc"
 };
 
