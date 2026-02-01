@@ -1,10 +1,13 @@
-# Docker TCP Client for Example 6 (Zephyr TCP Server)
 
-This Docker module provides a TCP client for testing the **Example 6 TCP Server** running on a Zephyr board.
+# Python TCP Client for Example 6 (Zephyr TCP Server)
+
+This module provides a Python TCP client for testing the **Example 6 TCP Server** running on a Zephyr board.
+
 
 ## Purpose
 
-The client simulates a remote host connecting to the Zephyr TCP server and sends test messages that should be echoed back. This allows you to verify the server implementation without needing additional hardware or manual testing.
+The client simulates a remote host connecting to the Zephyr TCP server and sends test messages that should be echoed back. This allows you to verify the server implementation without additional hardware or manual testing.
+
 
 ## Quick Start
 
@@ -13,19 +16,19 @@ The client simulates a remote host connecting to the Zephyr TCP server and sends
 Before running this client, ensure:
 1. **Example 6 firmware** is flashed on your Zephyr board
 2. **Board is powered on** and connected to your network
-3. **Docker and Docker Compose** are installed on your host machine
+3. **Python 3** is installed on your host machine
 
-### Step 1: Build and Run the Docker Client
+### 1. Run the TCP Client
 
 ```bash
-# Navigate to the docker-tcp-client directory
-cd apps/tools/docker-tcp-client
+# Navigate to the tcp-client-test directory
+cd apps/tools/tcp-client-test
 
-# Build and run the container
-docker-compose up --build
+# Run the script directly with Python
+python tcp_client.py
 ```
 
-### Step 2: Monitor Board Serial Output
+### 2. Monitor Board Serial Output
 
 In another terminal, open a serial monitor to see the board receiving connections:
 
@@ -34,73 +37,65 @@ In another terminal, open a serial monitor to see the board receiving connection
 # Run "Serial Monitor" from Command Palette (Ctrl+Shift+P)
 
 # Option 2: Using miniterm directly
-python -m serial.tools.miniterm /dev/ttyUSB0 115200 --eol LF
-# On Windows: COM3 instead of /dev/ttyUSB0
+python -m serial.tools.miniterm COM3 115200 --eol LF
+# On Linux/Mac: use /dev/ttyUSB0 instead of COM3
 ```
 
-### Step 3: Verify Output
+### 3. Verify Output
 
-**Expected Docker client output:**
+
+**Expected TCP client output:**
 ```
 [INFO] TCP Client for Zephyr Server
 [INFO] Connecting to 192.168.1.100:5555...
 
 [CONNECTED] Successfully connected to 192.168.1.100:5555
 
-[1] Sending: Hello from Docker!
-[1] Received: Hello from Docker!
+[1] Sending: Hello from TCP client!
+[1] Received: Hello from TCP client!
 [1] ✓ Echo verified!
 
 [2] Sending: Test message 1
 [2] Received: Test message 1
 [2] ✓ Echo verified!
-
 ...
-
 [INFO] Connection closed
 [INFO] Test completed successfully!
 ```
+
 
 **Expected board serial output:**
 ```
 [tcp-server] IPv4 address assigned: 192.168.1.100/24, gateway: 192.168.1.1, dns: 192.168.1.1
 [tcp-server] TCP Server listening on 0.0.0.0:5555...
 [tcp-server] Client 192.168.1.x:xxxxx connected
-[tcp-server] Received (19 bytes): Hello from Docker!
-[tcp-server] Sending echo: Hello from Docker!
+[tcp-server] Received (19 bytes): Hello from TCP client!
+[tcp-server] Sending echo: Hello from TCP client!
 [tcp-server] Received (15 bytes): Test message 1
 [tcp-server] Sending echo: Test message 1
 ...
 [tcp-server] Client disconnected
 ```
 
+
 ## How It Works
 
 ### Network Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Host Machine                       │
-│  ┌──────────────────────────────────────────────┐   │
-│  │  Docker Container (tcp_client.py)            │   │
-│  │  - Connects to 192.168.1.100:5555           │   │
-│  │  - Sends test messages                       │   │
-│  │  - Receives echoed responses                 │   │
-│  └──────┬───────────────────────────────────────┘   │
-│         │ (eth_network bridge)                       │
-│  ┌──────┴───────────────────────────────────────┐   │
-│  │  Docker Network (eth_network)                │   │
-│  │  - Bridges docker-compose to host network    │   │
-│  └──────┬───────────────────────────────────────┘   │
-│         │ (Physical or Virtual Ethernet)             │
-└────────┬──────────────────────────────────────────────┘
-         │
-    ┌────┴──────────────────────────────────────┐
-    │   Zephyr Board (STM32H573I-DK)            │
-    │   - Runs Example 6 TCP Server             │
-    │   - Listening on 192.168.1.100:5555       │
-    │   - Echoes received messages              │
-    └──────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│           Host PC (tcp_client.py)            │
+│  - Connects to 192.168.1.100:5555           │
+│  - Sends test messages                      │
+│  - Receives echoed responses                │
+└──────────────┬──────────────────────────────┘
+               │ (Ethernet/WiFi)
+    ┌──────────┴──────────────────────────────┐
+    │   Zephyr Board (STM32H573I-DK)         │
+    │   - Runs Example 6 TCP Server          │
+    │   - Listens on 192.168.1.100:5555      │
+    │   - Echoes received messages           │
+    └───────────────────────────────────────┘
 ```
 
 ### Connection Flow
@@ -111,11 +106,12 @@ python -m serial.tools.miniterm /dev/ttyUSB0 115200 --eol LF
    - Client sends a test message
    - Server receives and echoes back
    - Client receives the echo
-   - Verify echo matches original message
-4. **Cleanup**: Client closes socket and Docker container exits
+   - Verifies echo matches original message
+4. **Cleanup**: Client closes socket and exits
 
 
-## Author Notes
+
+## Notes
 
 - Client sends 4 different test messages
 - Verifies each echo matches the original message

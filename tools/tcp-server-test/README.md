@@ -1,59 +1,62 @@
-# Docker TCP Echo Server
 
-Standalone Docker module for testing TCP communication.
+# Python TCP Echo Server
+
+Standalone Python module for testing TCP communication.
+
 
 ## Quick Start
 
 ```bash
-docker-compose up
+# Navigate to the tcp-server-test directory
+cd apps/tools/tcp-server-test
+
+# Run the echo server directly with Python
+python tcp_echo_server.py
 ```
 
 Server will listen on:
-- IP: 192.168.1.1 (Docker network)
+- IP: 0.0.0.0 (all interfaces)
 - Port: 4242
 - Protocol: TCP
 
+
 ## What It Does
 
-- Python TCP echo server in Docker container
-- Automatically configured with docker-compose
+- Python TCP echo server (no Docker required)
 - No manual setup needed - just run!
+
 
 ## Files
 
-- `Dockerfile` - Container definition
-- `docker-compose.yml` - Docker Compose configuration
 - `tcp_echo_server.py` - Echo server implementation
+
 
 ## Network
 
-The docker-compose.yml creates an isolated Docker network (192.168.1.0/24):
-- Server IP: 192.168.1.1
+The server listens on all interfaces (0.0.0.0) by default:
+- Server IP: 0.0.0.0 (use your PC's IP on the LAN)
 - Port: 4242
+
 
 ## Commands
 
 ```bash
 # Start server
-docker-compose up
+python tcp_echo_server.py
 
 # Stop server
 Ctrl+C
-
-# View logs
-docker-compose logs -f
-
-# Clean up
-docker-compose down
 ```
+
 
 ## Requirements
 
-- Docker Desktop installed
+- Python 3 installed
+
 
 ## Usage
 
 1. Start the server from this folder
 2. Flash the board with Example 5 firmware
-3. Board will connect to 192.168.1.1:4242
+3. Board will connect to your PC's IP address on port 4242
 4. Watch the echo server log for connections
