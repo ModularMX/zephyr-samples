@@ -15,28 +15,28 @@ This is a **didactic, reusable example** showing every step of TCP client commun
 ## Quick Start
 
 ### Prerequisites
-- Docker & Docker-compose
+- Python 3 (for host test script)
 
 ### Steps
 
-**1. Start the Docker echo server (Terminal 1):**
+**1. Flash the board (Terminal 1):**
 ```bash
-cd apps/tools/docker-tcp-echo
-docker-compose up
-```
-Wait for: `[INFO] Listening on 0.0.0.0:4242`
-
-**2. Flash the board (Terminal 2):**
-```bash
-west flash -b <BOARD_NAME> apps/networking/ETHERNET/_05_TCP_client
+west flash -b <BOARD_NAME> apps/networking/ETHERNET/_05_tcp_client
 ```
 Replace `<BOARD_NAME>` with your board (e.g., `stm32h573i_dk`, `nrf52840dk_nrf52840`, `qemu_x86`, etc.)
 
-**3. Monitor serial output (Terminal 3):**
+**2. Monitor serial output (Terminal 2):**
 ```bash
 python -m serial.tools.miniterm COM3 115200 --eol LF
 ```
 *(Replace COM3 with your board's serial port)*
+
+**3. Run the host test script (Terminal 3):**
+```bash
+cd apps/networking/ETHERNET/_05_tcp_client/pc_server
+python tcp_echo_server.py
+```
+This script will act as a TCP echo server for the Zephyr TCP client and echo back any received data.
 
 **Expected board output:**
 ```

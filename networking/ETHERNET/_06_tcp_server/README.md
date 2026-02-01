@@ -17,14 +17,14 @@ This is a **didactic, sequential server** showing every step of TCP server commu
 ## Quick Start
 
 ### Prerequisites
-- Docker Desktop: https://www.docker.com/products/docker-desktop
+- Python 3 (for host test script)
 - For testing: Example 5 (TCP Client) on another board, or a TCP client running on your PC
 
 ### Steps
 
 **1. Build and Flash the TCP Server (Terminal 1):**
 ```bash
-west flash -b <BOARD_NAME> apps/networking/ETHERNET/_06_TCP_client
+west flash -b <BOARD_NAME> apps/networking/ETHERNET/_06_tcp_server
 ```
 Replace `<BOARD_NAME>` with your board (e.g., `stm32h573i_dk`, `nrf52840dk_nrf52840`, `qemu_x86`, etc.)
 
@@ -34,9 +34,12 @@ python -m serial.tools.miniterm COM3 115200 --eol LF
 ```
 *(Replace COM3 with your board's serial port)*
 
-**3. Run Docker TCP Client (Terminal 3):**
-
-The Docker TCP client simulates a remote host connecting to your server and sending test messages.
+**3. Run the host test script (Terminal 3):**
+```bash
+cd apps/networking/ETHERNET/_06_tcp_server/pc_client
+python tcp_client.py
+```
+This script will connect to the Zephyr TCP server and verify communication.
 
 ```bash
 cd apps/tools/docker-tcp-client

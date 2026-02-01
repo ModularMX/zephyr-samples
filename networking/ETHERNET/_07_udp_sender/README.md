@@ -34,7 +34,19 @@ west flash
 
 ## Testing on PC
 
-### Linux/Mac
+### Using the provided Python host test script
+
+
+You can use the provided Python script to receive UDP packets on your PC:
+
+```bash
+cd apps/networking/ETHERNET/_07_udp_sender/pc_receiver
+python udp_receiver_test.py
+```
+
+This script will display incoming UDP packets from the Zephyr board.
+
+Alternatively, you can use netcat (Linux/Mac):
 ```bash
 nc -lu 0.0.0.0 4242
 ```

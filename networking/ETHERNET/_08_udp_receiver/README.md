@@ -35,8 +35,11 @@ python -m serial.tools.miniterm COM3 115200
 
 **Terminal 2 - Send UDP packets:**
 ```bash
-python apps/tools/udp-sender-test/udp_sender_test.py
+cd apps/networking/ETHERNET/_08_udp_receiver/pc_sender
+python udp_sender_test.py
 ```
+
+This script will transmit UDP packets to the Zephyr board for testing.
 
 **Expected output:**
 ```
