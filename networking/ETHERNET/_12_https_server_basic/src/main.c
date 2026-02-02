@@ -14,13 +14,10 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 #include <zephyr/net/net_config.h>
-#include <zephyr/logging/log.h>
 
 // HTTPS server configuration
 #define HTTPS_SERVER_PORT 4443
 #define MAX_HTTPS_CLIENTS 4
-
-LOG_MODULE_REGISTER(https_server_sample, LOG_LEVEL_DBG);
 
 // =============================================================================
 // STATIC RESOURCES (Compressed with gzip)
@@ -83,7 +80,7 @@ static int device_info_handler(struct http_client_ctx *client, enum http_data_st
 	static char info_buf[256];
 	int len;
 
-	LOG_DBG("Device info handler called, status: %d", status);
+	printk("[HTTPS] Device info handler called, status: %d\n", status);
 
 	// Wait for all request data to be received before responding
 	if (status == HTTP_SERVER_DATA_FINAL)
@@ -98,7 +95,7 @@ static int device_info_handler(struct http_client_ctx *client, enum http_data_st
 
 		if (len < 0 || len >= (int)sizeof(info_buf))
 		{
-			LOG_ERR("Failed to format device info");
+			printk("[ERR] Failed to format device info\n");
 			return -ENOMEM;
 		}
 
@@ -132,14 +129,14 @@ static int echo_handler(struct http_client_ctx *client, enum http_data_status st
 	// Handle aborted transactions (connection closed by client)
 	if (status == HTTP_SERVER_DATA_ABORTED)
 	{
-		LOG_DBG("Echo transaction aborted");
+		printk("[HTTPS] Echo transaction aborted\n");
 		return 0;
 	}
 
 	// Log received data
 	if (request_ctx->data_len > 0)
 	{
-		LOG_DBG("%s received %zd bytes", http_method_str(method), request_ctx->data_len);
+		printk("[HTTPS] %s received %zd bytes\n", http_method_str(method), request_ctx->data_len);
 	}
 
 	// Echo data back to client
@@ -175,14 +172,14 @@ static void setup_tls(void)
 {
 	int err;
 
-	LOG_INF("Setting up TLS credentials");
+	printk("[HTTPS] Setting up TLS credentials\n");
 
 	err = tls_credential_add(HTTP_SERVER_CERTIFICATE_TAG,
 							 TLS_CREDENTIAL_SERVER_CERTIFICATE,
 							 server_certificate, sizeof(server_certificate));
 	if (err < 0)
 	{
-		LOG_ERR("Failed to register server certificate: %d", err);
+		printk("[ERR] Failed to register server certificate: %d\n", err);
 	}
 
 	err = tls_credential_add(HTTP_SERVER_CERTIFICATE_TAG,
@@ -190,7 +187,7 @@ static void setup_tls(void)
 							 private_key, sizeof(private_key));
 	if (err < 0)
 	{
-		LOG_ERR("Failed to register private key: %d", err);
+		printk("[ERR] Failed to register private key: %d\n", err);
 	}
 
 	err = tls_credential_add(PSK_TAG,
@@ -199,7 +196,7 @@ static void setup_tls(void)
 							 sizeof(psk));
 	if (err < 0)
 	{
-		LOG_ERR("Failed to register PSK: %d", err);
+		printk("[ERR] Failed to register PSK: %d\n", err);
 	}
 
 	err = tls_credential_add(PSK_TAG,
@@ -208,7 +205,7 @@ static void setup_tls(void)
 							 sizeof(psk_id) - 1);
 	if (err < 0)
 	{
-		LOG_ERR("Failed to register PSK ID: %d", err);
+		printk("[ERR] Failed to register PSK ID: %d\n", err);
 	}
 }
 
@@ -249,12 +246,12 @@ HTTP_RESOURCE_DEFINE(echo_resource, https_service, "/echo", &echo_resource_detai
 
 int main(void)
 {
-	LOG_INF("Starting HTTPS Server on port %d", HTTPS_SERVER_PORT);
-	LOG_INF("Available endpoints:");
-	LOG_INF("  GET  /              -> HTML page");
-	LOG_INF("  GET  /main.js       -> JavaScript");
-	LOG_INF("  GET  /device-info   -> Device information (JSON)");
-	LOG_INF("  GET/POST /echo      -> Echo server");
+	printk("[HTTPS] Starting HTTPS Server on port %d\n", HTTPS_SERVER_PORT);
+	printk("[HTTPS] Available endpoints:\n");
+	printk("[HTTPS]   GET  /              -> HTML page\n");
+	printk("[HTTPS]   GET  /main.js       -> JavaScript\n");
+	printk("[HTTPS]   GET  /device-info   -> Device information (JSON)\n");
+	printk("[HTTPS]   GET/POST /echo      -> Echo server\n");
 
 	// Setup TLS credentials before starting the server
 	setup_tls();

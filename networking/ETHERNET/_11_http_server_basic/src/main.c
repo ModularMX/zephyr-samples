@@ -13,13 +13,10 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 #include <zephyr/net/net_config.h>
-#include <zephyr/logging/log.h>
 
 // HTTP server configuration
 #define HTTP_SERVER_PORT 8080
 #define MAX_HTTP_CLIENTS 4
-
-LOG_MODULE_REGISTER(http_server_sample, LOG_LEVEL_DBG);
 
 // =============================================================================
 // STATIC RESOURCES (Compressed with gzip)
@@ -82,7 +79,7 @@ static int device_info_handler(struct http_client_ctx *client, enum http_data_st
 	static char info_buf[256];
 	int len;
 
-	LOG_DBG("Device info handler called, status: %d", status);
+	printk("[HTTP] Device info handler called, status: %d\n", status);
 
 	// Wait for all request data to be received before responding
 	if (status == HTTP_SERVER_DATA_FINAL)
@@ -97,7 +94,7 @@ static int device_info_handler(struct http_client_ctx *client, enum http_data_st
 
 		if (len < 0 || len >= (int)sizeof(info_buf))
 		{
-			LOG_ERR("Failed to format device info");
+			printk("[ERR] Failed to format device info\n");
 			return -ENOMEM;
 		}
 
@@ -129,7 +126,7 @@ static int uptime_handler(struct http_client_ctx *client, enum http_data_status 
 	int ret;
 	static uint8_t uptime_buf[sizeof(STRINGIFY(INT64_MAX))];
 
-	LOG_DBG("Uptime handler called, status: %d", status);
+	printk("[HTTP] Uptime handler called, status: %d\n", status);
 
 	// Wait for all request data to be received before responding
 	// This is important for large requests that arrive in chunks
@@ -137,7 +134,7 @@ static int uptime_handler(struct http_client_ctx *client, enum http_data_status 
 		// Format the uptime (milliseconds since boot) as a string
 		ret = snprintf(uptime_buf, sizeof(uptime_buf), "%" PRId64, k_uptime_get());
 		if (ret < 0) {
-			LOG_ERR("Failed to format uptime, err %d", ret);
+			printk("[ERR] Failed to format uptime, err %d\n", ret);
 			return ret;
 		}
 
@@ -170,13 +167,13 @@ static int echo_handler(struct http_client_ctx *client, enum http_data_status st
 
 	// Handle aborted transactions (connection closed by client)
 	if (status == HTTP_SERVER_DATA_ABORTED) {
-		LOG_DBG("Echo transaction aborted");
+		printk("[HTTP] Echo transaction aborted\n");
 		return 0;
 	}
 
 	// Log received data
 	if (request_ctx->data_len > 0) {
-		LOG_DBG("%s received %zd bytes", http_method_str(method), request_ctx->data_len);
+		printk("[HTTP] %s received %zd bytes\n", http_method_str(method), request_ctx->data_len);
 	}
 
 	// Echo data back to client
@@ -232,12 +229,12 @@ HTTP_RESOURCE_DEFINE(echo_resource, http_service, "/echo", &echo_resource_detail
 
 int main(void)
 {
-	LOG_INF("Starting HTTP Server on port %d", HTTP_SERVER_PORT);
-	LOG_INF("Available endpoints:");
-	LOG_INF("  GET  /              -> HTML page");
-	LOG_INF("  GET  /main.js       -> JavaScript");
-	LOG_INF("  GET  /device-info   -> Device information (JSON)");
-	LOG_INF("  GET/POST /echo      -> Echo server");
+	printk("[HTTP] Starting HTTP Server on port %d\n", HTTP_SERVER_PORT);
+	printk("[HTTP] Available endpoints:\n");
+	printk("[HTTP]   GET  /              -> HTML page\n");
+	printk("[HTTP]   GET  /main.js       -> JavaScript\n");
+	printk("[HTTP]   GET  /device-info   -> Device information (JSON)\n");
+	printk("[HTTP]   GET/POST /echo      -> Echo server\n");
 	
 	// Start the HTTP server (blocking call)
 	http_server_start();
