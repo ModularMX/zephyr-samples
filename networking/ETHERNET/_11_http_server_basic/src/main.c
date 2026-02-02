@@ -150,12 +150,12 @@ static int uptime_handler(struct http_client_ctx *client, enum http_data_status 
 	return 0;
 }
 
-static struct http_resource_detail_dynamic uptime_resource_detail = {
+static struct http_resource_detail_dynamic device_info_resource_detail = {
 	.common = {
 		.type = HTTP_RESOURCE_TYPE_DYNAMIC,
 		.bitmask_of_supported_http_methods = BIT(HTTP_GET),
 	},
-	.cb = uptime_handler,
+	.cb = device_info_handler,
 	.user_data = NULL,
 };
 
