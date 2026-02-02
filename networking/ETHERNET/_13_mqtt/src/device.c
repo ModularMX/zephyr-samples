@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(app_device, LOG_LEVEL_DBG);
-
 #include <zephyr/kernel.h>
+#include <stdio.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/drivers/led.h>
 #include <zephyr/random/random.h>
@@ -45,11 +43,11 @@ void device_command_handler(uint8_t *command)
 {
 	for (int i = 0; i < num_device_commands; i++) {
 		if (strcmp(command, device_commands[i].command) == 0) {
-			LOG_INF("Executing device command: %s", device_commands[i].command);
+			printk("Executing device command: %s\n", device_commands[i].command);
 			return device_commands[i].handler();
 		}
 	}
-	LOG_ERR("Unknown command: %s", command);
+	printk("Unknown command: %s\n", command);
 }
 
 int device_read_sensor(struct sensor_sample *sample)
@@ -68,13 +66,13 @@ int device_read_sensor(struct sensor_sample *sample)
 
 	rc = sensor_sample_fetch(sensor);
 	if (rc) {
-		LOG_ERR("Failed to fetch sensor sample [%d]", rc);
+		printk("Failed to fetch sensor sample [%d]\n", rc);
 		return rc;
 	}
 
 	rc = sensor_channel_get(sensor, SENSOR_CHAN, &sensor_val);
 	if (rc) {
-		LOG_ERR("Failed to get sensor channel [%d]", rc);
+		printk("Failed to get sensor channel [%d]\n", rc);
 		return rc;
 	}
 
@@ -90,20 +88,20 @@ int device_write_led(enum led_id led_idx, enum led_state state)
 	switch (state) {
 	case LED_OFF:
 		if (leds == NULL) {
-			LOG_INF("LED %d OFF", led_idx);
+			printk("LED %d OFF\n", led_idx);
 			break;
 		}
 		led_off(leds, led_idx);
 		break;
 	case LED_ON:
 		if (leds == NULL) {
-			LOG_INF("LED %d ON", led_idx);
+			printk("LED %d ON\n", led_idx);
 			break;
 		}
 		led_on(leds, led_idx);
 		break;
 	default:
-		LOG_ERR("Invalid LED state setting");
+		printk("Invalid LED state setting\n");
 		rc = -EINVAL;
 		break;
 	}
@@ -118,19 +116,19 @@ bool devices_ready(void)
 	/* Check readiness only if a real sensor device is present */
 	if (sensor != NULL) {
 		if (!device_is_ready(sensor)) {
-			LOG_ERR("Device %s is not ready", sensor->name);
+			printk("Device %s is not ready\n", sensor->name);
 			rc = false;
 		} else {
-			LOG_INF("Device %s is ready", sensor->name);
+			printk("Device %s is ready\n", sensor->name);
 		}
 	}
 
 	if (leds != NULL) {
 		if (!device_is_ready(leds)) {
-			LOG_ERR("Device %s is not ready", leds->name);
+			printk("Device %s is not ready\n", leds->name);
 			rc = false;
 		} else {
-			LOG_INF("Device %s is ready", leds->name);
+			printk("Device %s is ready\n", leds->name);
 		}
 	}
 

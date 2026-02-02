@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(app_main, LOG_LEVEL_DBG);
-
 #include <zephyr/kernel.h>
+#include <stdio.h>
 #include <zephyr/net/mqtt.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
@@ -38,7 +36,7 @@ static void net_event_handler(struct net_mgmt_event_callback *cb,
 	if (mgmt_event == NET_EVENT_IPV4_ADDR_ADD)
 	{
 		k_sem_give(&net_conn_sem);
-		LOG_INF("IPv4 address assigned - network ready!");
+		printk("IPv4 address assigned - network ready!\n");
 	}
 }
 
@@ -49,9 +47,9 @@ void log_mac_addr(struct net_if *iface)
 
 	mac = net_if_get_link_addr(iface);
 
-	LOG_INF("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
-			mac->addr[0], mac->addr[1], mac->addr[2],
-			mac->addr[3], mac->addr[4], mac->addr[5]);
+	printk("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+		   mac->addr[0], mac->addr[1], mac->addr[2],
+		   mac->addr[3], mac->addr[4], mac->addr[5]);
 }
 
 /** The system work queue is used to handle periodic MQTT publishing.
@@ -68,7 +66,7 @@ static void publish_work_handler(struct k_work *work)
 		rc = app_mqtt_publish(&client_ctx);
 		if (rc != 0)
 		{
-			LOG_INF("MQTT Publish failed [%d]", rc);
+			printk("MQTT Publish failed [%d]\n", rc);
 		}
 		k_work_reschedule(&mqtt_publish_work,
 						  K_SECONDS(MQTT_PUBLISH_INTERVAL));
@@ -89,7 +87,7 @@ int main(void)
 	iface = net_if_get_default();
 	if (iface == NULL)
 	{
-		LOG_ERR("No network interface configured");
+		printk("No network interface configured\n");
 		return -ENETDOWN;
 	}
 
@@ -102,7 +100,7 @@ int main(void)
 	net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD);
 	net_mgmt_add_event_callback(&mgmt_cb);
 
-	LOG_INF("Waiting for network configuration (DHCP)...");
+	printk("Waiting for network configuration (DHCP)...\n");
 
 	/* Check if we already have an IP address (DHCP may have completed before main()) */
 	if (!net_if_ipv4_get_global_addr(iface, NET_ADDR_PREFERRED))
@@ -110,20 +108,20 @@ int main(void)
 		/* Wait for IPv4 address assignment from DHCP */
 		while (k_sem_take(&net_conn_sem, K_MSEC(5000)) != 0)
 		{
-			LOG_INF("Still waiting for IP address...");
+			printk("Still waiting for IP address...\n");
 		}
 	}
 	else
 	{
-		LOG_INF("IPv4 address already assigned!");
+		printk("IPv4 address already assigned!\n");
 	}
 
-	LOG_INF("Network ready, initializing MQTT...");
+	printk("Network ready, initializing MQTT...\n");
 
 	rc = app_mqtt_init(&client_ctx);
 	if (rc != 0)
 	{
-		LOG_ERR("MQTT Init failed [%d]", rc);
+		printk("MQTT Init failed [%d]\n", rc);
 		return rc;
 	}
 
