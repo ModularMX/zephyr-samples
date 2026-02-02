@@ -1,12 +1,11 @@
-/*
- * Copyright (c) 2023, Emna Rekik
- * Copyright (c) 2024, Nordic Semiconductor
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// HTTPS Server Example for Zephyr with TLS
+// Based on _11_http_server_basic with added TLS/HTTPS support
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/tls_credentials.h>
@@ -14,40 +13,37 @@
 #include <zephyr/net/http/service.h>
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
-#include "zephyr/device.h"
-#include "zephyr/sys/util.h"
-#include <zephyr/drivers/led.h>
-#include <zephyr/data/json.h>
-#include <zephyr/sys/util_macro.h>
 #include <zephyr/net/net_config.h>
-
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(net_http_server_sample, LOG_LEVEL_DBG);
 
-#define CONFIG_NET_SAMPLE_HTTPS_SERVICE 1
+// HTTPS server configuration
+#define HTTPS_SERVER_PORT 4443
+#define MAX_HTTPS_CLIENTS 4
 
-struct led_command
-{
-	int led_num;
-	bool led_state;
-};
+LOG_MODULE_REGISTER(https_server_sample, LOG_LEVEL_DBG);
 
-static const struct json_obj_descr led_command_descr[] = {
-	JSON_OBJ_DESCR_PRIM(struct led_command, led_num, JSON_TOK_NUMBER),
-	JSON_OBJ_DESCR_PRIM(struct led_command, led_state, JSON_TOK_TRUE),
-};
+// =============================================================================
+// STATIC RESOURCES (Compressed with gzip)
+// =============================================================================
 
-static const struct device *leds_dev = DEVICE_DT_GET_ANY(gpio_leds);
-
-static uint8_t index_html_gz[] = {
+// HTML content - compressed at build time
+static const uint8_t index_html_gz[] = {
 #include "index.html.gz.inc"
 };
 
-static uint8_t main_js_gz[] = {
+// JavaScript content - compressed at build time
+static const uint8_t main_js_gz[] = {
 #include "main.js.gz.inc"
 };
 
-static struct http_resource_detail_static index_html_gz_resource_detail = {
+// =============================================================================
+// RESOURCE DEFINITIONS
+// =============================================================================
+
+// Index.html resource - served at "/" endpoint
+// Client sends: GET /
+// Server responds: HTML page (gzipped)
+static struct http_resource_detail_static index_html_resource_detail = {
 	.common = {
 		.type = HTTP_RESOURCE_TYPE_STATIC,
 		.bitmask_of_supported_http_methods = BIT(HTTP_GET),
@@ -58,7 +54,10 @@ static struct http_resource_detail_static index_html_gz_resource_detail = {
 	.static_data_len = sizeof(index_html_gz),
 };
 
-static struct http_resource_detail_static main_js_gz_resource_detail = {
+// Main.js resource - served at "/main.js" endpoint
+// Client sends: GET /main.js
+// Server responds: JavaScript file (gzipped)
+static struct http_resource_detail_static main_js_resource_detail = {
 	.common = {
 		.type = HTTP_RESOURCE_TYPE_STATIC,
 		.bitmask_of_supported_http_methods = BIT(HTTP_GET),
@@ -69,39 +68,84 @@ static struct http_resource_detail_static main_js_gz_resource_detail = {
 	.static_data_len = sizeof(main_js_gz),
 };
 
+// =============================================================================
+// DYNAMIC RESOURCE HANDLERS
+// =============================================================================
+
+// Device info handler - returns device information as JSON
+// Client sends: GET /device-info
+// Server responds: JSON with board, architecture, uptime, status
+static int device_info_handler(struct http_client_ctx *client, enum http_data_status status,
+							   const struct http_request_ctx *request_ctx,
+							   struct http_response_ctx *response_ctx, void *user_data)
+{
+	// Buffer for JSON response
+	static char info_buf[256];
+	int len;
+
+	LOG_DBG("Device info handler called, status: %d", status);
+
+	// Wait for all request data to be received before responding
+	if (status == HTTP_SERVER_DATA_FINAL)
+	{
+		// Build JSON response with device information
+		len = snprintf(info_buf, sizeof(info_buf),
+					   "{\"board\":\"STM32H573I-DK\","
+					   "\"arch\":\"ARM Cortex-M33\","
+					   "\"uptime\":%" PRId64 ","
+					   "\"status\":\"Running\"}",
+					   k_uptime_get());
+
+		if (len < 0 || len >= (int)sizeof(info_buf))
+		{
+			LOG_ERR("Failed to format device info");
+			return -ENOMEM;
+		}
+
+		// Set response body and mark as complete
+		response_ctx->body = (uint8_t *)info_buf;
+		response_ctx->body_len = len;
+		response_ctx->final_chunk = true;
+	}
+
+	return 0;
+}
+
+static struct http_resource_detail_dynamic device_info_resource_detail = {
+	.common = {
+		.type = HTTP_RESOURCE_TYPE_DYNAMIC,
+		.bitmask_of_supported_http_methods = BIT(HTTP_GET),
+	},
+	.cb = device_info_handler,
+	.user_data = NULL,
+};
+
+// Echo handler - echoes back the received data
+// Client sends: GET /echo or POST /echo with body
+// Server responds: Same body data back to client
 static int echo_handler(struct http_client_ctx *client, enum http_data_status status,
 						const struct http_request_ctx *request_ctx,
 						struct http_response_ctx *response_ctx, void *user_data)
 {
-#define MAX_TEMP_PRINT_LEN 32
-	static char print_str[MAX_TEMP_PRINT_LEN];
 	enum http_method method = client->method;
-	static size_t processed;
 
+	// Handle aborted transactions (connection closed by client)
 	if (status == HTTP_SERVER_DATA_ABORTED)
 	{
-		LOG_DBG("Transaction aborted after %zd bytes.", processed);
-		processed = 0;
+		LOG_DBG("Echo transaction aborted");
 		return 0;
 	}
 
-	__ASSERT_NO_MSG(buffer != NULL);
-
-	processed += request_ctx->data_len;
-
-	snprintf(print_str, sizeof(print_str), "%s received (%zd bytes)", http_method_str(method),
-			 request_ctx->data_len);
-	LOG_HEXDUMP_DBG(request_ctx->data, request_ctx->data_len, print_str);
-
-	if (status == HTTP_SERVER_DATA_FINAL)
+	// Log received data
+	if (request_ctx->data_len > 0)
 	{
-		LOG_DBG("All data received (%zd bytes).", processed);
-		processed = 0;
+		LOG_DBG("%s received %zd bytes", http_method_str(method), request_ctx->data_len);
 	}
 
-	/* Echo data back to client */
+	// Echo data back to client
 	response_ctx->body = request_ctx->data;
 	response_ctx->body_len = request_ctx->data_len;
+	// Mark as final chunk if all data received
 	response_ctx->final_chunk = (status == HTTP_SERVER_DATA_FINAL);
 
 	return 0;
@@ -116,157 +160,29 @@ static struct http_resource_detail_dynamic echo_resource_detail = {
 	.user_data = NULL,
 };
 
-static int uptime_handler(struct http_client_ctx *client, enum http_data_status status,
-						  const struct http_request_ctx *request_ctx,
-						  struct http_response_ctx *response_ctx, void *user_data)
-{
-	int ret;
-	static uint8_t uptime_buf[sizeof(STRINGIFY(INT64_MAX))];
-
-	LOG_DBG("Uptime handler status %d", status);
-
-	/* A payload is not expected with the GET request. Ignore any data and wait until
-	 * final callback before sending response
-	 */
-	if (status == HTTP_SERVER_DATA_FINAL)
-	{
-		ret = snprintf(uptime_buf, sizeof(uptime_buf), "%" PRId64, k_uptime_get());
-		if (ret < 0)
-		{
-			LOG_ERR("Failed to snprintf uptime, err %d", ret);
-			return ret;
-		}
-
-		response_ctx->body = uptime_buf;
-		response_ctx->body_len = ret;
-		response_ctx->final_chunk = true;
-	}
-
-	return 0;
-}
-
-static struct http_resource_detail_dynamic uptime_resource_detail = {
-	.common = {
-		.type = HTTP_RESOURCE_TYPE_DYNAMIC,
-		.bitmask_of_supported_http_methods = BIT(HTTP_GET),
-	},
-	.cb = uptime_handler,
-	.user_data = NULL,
-};
-
-static void parse_led_post(uint8_t *buf, size_t len)
-{
-	int ret;
-	struct led_command cmd;
-	const int expected_return_code = BIT_MASK(ARRAY_SIZE(led_command_descr));
-
-	ret = json_obj_parse(buf, len, led_command_descr, ARRAY_SIZE(led_command_descr), &cmd);
-	if (ret != expected_return_code)
-	{
-		LOG_WRN("Failed to fully parse JSON payload, ret=%d", ret);
-		return;
-	}
-
-	LOG_INF("POST request setting LED %d to state %d", cmd.led_num, cmd.led_state);
-
-	if (leds_dev != NULL)
-	{
-		if (cmd.led_state)
-		{
-			led_on(leds_dev, cmd.led_num);
-		}
-		else
-		{
-			led_off(leds_dev, cmd.led_num);
-		}
-	}
-}
-
-static int led_handler(struct http_client_ctx *client, enum http_data_status status,
-					   const struct http_request_ctx *request_ctx,
-					   struct http_response_ctx *response_ctx, void *user_data)
-{
-	static uint8_t post_payload_buf[32];
-	static size_t cursor;
-
-	LOG_DBG("LED handler status %d, size %zu", status, request_ctx->data_len);
-
-	if (status == HTTP_SERVER_DATA_ABORTED)
-	{
-		cursor = 0;
-		return 0;
-	}
-
-	if (request_ctx->data_len + cursor > sizeof(post_payload_buf))
-	{
-		cursor = 0;
-		return -ENOMEM;
-	}
-
-	/* Copy payload to our buffer. Note that even for a small payload, it may arrive split into
-	 * chunks (e.g. if the header size was such that the whole HTTP request exceeds the size of
-	 * the client buffer).
-	 */
-	memcpy(post_payload_buf + cursor, request_ctx->data, request_ctx->data_len);
-	cursor += request_ctx->data_len;
-
-	if (status == HTTP_SERVER_DATA_FINAL)
-	{
-		parse_led_post(post_payload_buf, cursor);
-		cursor = 0;
-	}
-
-	return 0;
-}
-
-static struct http_resource_detail_dynamic led_resource_detail = {
-	.common = {
-		.type = HTTP_RESOURCE_TYPE_DYNAMIC,
-		.bitmask_of_supported_http_methods = BIT(HTTP_POST),
-	},
-	.cb = led_handler,
-	.user_data = NULL,
-};
+// =============================================================================
+// TLS CERTIFICATE CONFIGURATION
+// =============================================================================
 
 #include "certificate.h"
 
 static const sec_tag_t sec_tag_list_verify_none[] = {
 	HTTP_SERVER_CERTIFICATE_TAG,
-#if defined(CONFIG_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED)
 	PSK_TAG,
-#endif
 };
-
-static uint16_t test_https_service_port = 4443;
-HTTPS_SERVICE_DEFINE(test_https_service, NULL, &test_https_service_port,
-					 4, 10, NULL, NULL, NULL, sec_tag_list_verify_none,
-					 sizeof(sec_tag_list_verify_none));
-
-HTTP_RESOURCE_DEFINE(index_html_gz_resource_https, test_https_service, "/",
-					 &index_html_gz_resource_detail);
-
-HTTP_RESOURCE_DEFINE(main_js_gz_resource_https, test_https_service, "/main.js",
-					 &main_js_gz_resource_detail);
-
-HTTP_RESOURCE_DEFINE(echo_resource_https, test_https_service, "/dynamic", &echo_resource_detail);
-
-HTTP_RESOURCE_DEFINE(uptime_resource_https, test_https_service, "/uptime", &uptime_resource_detail);
-
-HTTP_RESOURCE_DEFINE(led_resource_https, test_https_service, "/led", &led_resource_detail);
-
-
 
 static void setup_tls(void)
 {
 	int err;
 
+	LOG_INF("Setting up TLS credentials");
+
 	err = tls_credential_add(HTTP_SERVER_CERTIFICATE_TAG,
-							 TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
-							 server_certificate,
-							 sizeof(server_certificate));
+							 TLS_CREDENTIAL_SERVER_CERTIFICATE,
+							 server_certificate, sizeof(server_certificate));
 	if (err < 0)
 	{
-		LOG_ERR("Failed to register public certificate: %d", err);
+		LOG_ERR("Failed to register server certificate: %d", err);
 	}
 
 	err = tls_credential_add(HTTP_SERVER_CERTIFICATE_TAG,
@@ -296,10 +212,55 @@ static void setup_tls(void)
 	}
 }
 
+// =============================================================================
+// HTTPS SERVICE CONFIGURATION
+// =============================================================================
+
+// Define the HTTPS service with TLS
+// - Listens on all interfaces (NULL = bind to all)
+// - Port: 4443
+// - Max 4 simultaneous clients
+// - Max 10 streams per client
+// - Uses TLS with credentials
+static uint16_t https_service_port = HTTPS_SERVER_PORT;
+HTTPS_SERVICE_DEFINE(https_service, NULL, &https_service_port,
+					 MAX_HTTPS_CLIENTS, 10, NULL, NULL, NULL, sec_tag_list_verify_none,
+					 sizeof(sec_tag_list_verify_none));
+
+// =============================================================================
+// RESOURCE ROUTING
+// =============================================================================
+
+// Route "/" -> static HTML
+HTTP_RESOURCE_DEFINE(index_resource, https_service, "/", &index_html_resource_detail);
+
+// Route "/main.js" -> static JavaScript
+HTTP_RESOURCE_DEFINE(main_js_resource, https_service, "/main.js", &main_js_resource_detail);
+
+// Route "/device-info" -> dynamic endpoint (calls device_info_handler)
+HTTP_RESOURCE_DEFINE(device_info_resource, https_service, "/device-info", &device_info_resource_detail);
+
+// Route "/echo" -> dynamic endpoint (echoes back data)
+HTTP_RESOURCE_DEFINE(echo_resource, https_service, "/echo", &echo_resource_detail);
+
+// =============================================================================
+// MAIN APPLICATION
+// =============================================================================
 
 int main(void)
 {
+	LOG_INF("Starting HTTPS Server on port %d", HTTPS_SERVER_PORT);
+	LOG_INF("Available endpoints:");
+	LOG_INF("  GET  /              -> HTML page");
+	LOG_INF("  GET  /main.js       -> JavaScript");
+	LOG_INF("  GET  /device-info   -> Device information (JSON)");
+	LOG_INF("  GET/POST /echo      -> Echo server");
+
+	// Setup TLS credentials before starting the server
 	setup_tls();
+
+	// Start the HTTPS server (blocking call)
 	http_server_start();
+
 	return 0;
 }

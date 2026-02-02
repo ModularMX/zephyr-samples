@@ -23,8 +23,7 @@ static const unsigned char private_key[] = {
 #include "server_privkey.der.inc"
 };
 
-#if defined(CONFIG_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED)
-#include CONFIG_NET_SAMPLE_PSK_HEADER_FILE
-#endif
+// Dummy PSK and PSK ID for TLS PSK authentication
+#include "dummy_psk.h"
 
 #endif /* __CERTIFICATE_H__ */

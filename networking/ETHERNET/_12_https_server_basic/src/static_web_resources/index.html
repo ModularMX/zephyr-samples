@@ -1,57 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <script src="main.js"></script>
-    <title>Zephyr HTTP Server</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zephyr RTOS - HTTPS Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+    
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+    
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+    
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+    
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+    
+        .content {
+            padding: 40px;
+        }
+    
+        .info-section {
+            margin-bottom: 30px;
+        }
+    
+        .info-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+    
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+    
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    
+        .info-label {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+    
+        .info-value {
+            color: #333;
+            font-size: 1.1em;
+            word-break: break-all;
+        }
+    
+        .device-info {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    
+        .status-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .security-badge {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+    
+        .footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+    
+        @media (max-width: 500px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+    
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Welcome to Zephyr HTTP Server!</h1>
-    <p>This is a simple HTML file.</p>
+    <div class="container">
+        <div class="header">
+            <h1>� Hello World!</h1>
+            <p>Zephyr RTOS HTTPS Server (Secure)</p>
+        </div>
+    
+        <div class="content">
+            <!-- Device Info Section -->
+            <div class="info-section">
+                <div class="info-title">📱 Device Information</div>
+                <div class="device-info">
+                    <div style="margin-bottom: 15px;">
+                        <span class="status-badge">✓ Online</span>
+                        <span class="security-badge">🔐 HTTPS Secure</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Board</div>
+                            <div class="info-value" id="board">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Architecture</div>
+                            <div class="info-value" id="arch">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Uptime</div>
+                            <div class="info-value" id="uptime">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value" id="status">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <h4>LED Control</h4>
-    <p>The buttons below toggle the LED on the board, or print a message to the console if the board does not have an LED. This demonstrates dynamic handling of a POST request.</p>
-    <input id="led_on" type="button" value="LED on">
-    <input id="led_off" type="button" value="LED off">
+            <!-- Echo Test Section -->
+            <div class="info-section">
+                <div class="info-title">🔄 Echo Test</div>
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="echoInput" placeholder="Type something and press Enter..."
+                        style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
+                </div>
+                <div id="echoOutput" class="info-item" style="display: none;">
+                    <div class="info-label">Server Response:</div>
+                    <div class="info-value" id="echoValue"></div>
+                </div>
+            </div>
+            </div>
 
-    <h4>Uptime Counter</h4>
-    <p>Below is the device uptime. This demonstrates dynamic handling of a GET request</p>
-    <p id="uptime"></p>
+        <div class="footer">
+            <p>� Powered by Zephyr RTOS with TLS/HTTPS</p>
+            <p id="lastUpdate">Last updated: never</p>
+        </div>
+        </div>
 
-    <h4>Network Statistics</h4>
-    <p>Below are the network statistics. This demonstrates streaming data from server to client using a websocket.</p>
-    <table>
-        <tr>
-            <td>Total bytes received</td>
-            <td id="bytes_recv"></td>
-        </tr>
-        <tr>
-            <td>Total bytes sent</td>
-            <td id="bytes_sent"></td>
-        </tr>
-        <tr>
-            <td>IPv6 packets received</td>
-            <td id="ipv6_pkt_recv"></td>
-        </tr>
-        <tr>
-            <td>IPv6 packets sent</td>
-            <td id="ipv6_pkt_sent"></td>
-        </tr>
-        <tr>
-            <td>IPv4 packets received</td>
-            <td id="ipv4_pkt_recv"></td>
-        </tr>
-        <tr>
-            <td>IPv4 packets sent</td>
-            <td id="ipv4_pkt_sent"></td>
-        </tr>
-        <tr>
-            <td>TCP bytes received</td>
-            <td id="tcp_bytes_recv"></td>
-        </tr>
-        <tr>
-            <td>TCP bytes sent</td>
-            <td id="tcp_bytes_sent"></td>
-        </tr>
-    </table>
+    <script src="main.js"></script>
 </body>
+
 </html>
