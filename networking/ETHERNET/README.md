@@ -73,6 +73,87 @@ HTTPS client that makes secure GET and POST requests using TLS/SSL encryption.
 - JSON payload support
 - Server hostname validation
 
+### _11_http_server_basic
+**Beginner-friendly HTTP server with web interface** for learning server-side networking.
+
+**Use cases:**
+- Device configuration web interface
+- Real-time device monitoring
+- REST API endpoint implementation
+- Web-based data dashboard
+- Learning HTTP protocol fundamentals
+
+**Features:**
+- Responsive web UI with HTML/CSS/JavaScript
+- Device information endpoint (JSON)
+- Echo service for POST testing
+- Real-time device status updates
+- Gzip-compressed static resources
+- Multiple simultaneous connections
+- Port: 8080
+
+**Learning Topics:**
+- HTTP server implementation in Zephyr
+- Static resource serving
+- Dynamic endpoint handlers
+- JSON response formatting
+- Client-server communication patterns
+
+### _12_https_server_basic
+**Beginner-friendly HTTPS server with TLS/SSL encryption** for secure web interface and REST API.
+
+**Use cases:**
+- Secure device configuration interface
+- Encrypted REST API endpoints
+- Production-ready server foundation
+- Secure real-time monitoring
+- Learning HTTPS and TLS fundamentals
+
+**Features:**
+- **Full TLS/SSL Encryption** - All traffic encrypted end-to-end
+- **Auto-Generated Certificates** - Self-signed certificates generated automatically
+- **Responsive Web UI** - Security indicators and HTTPS badges
+- **Device Information Endpoint** - Secure JSON data over HTTPS
+- **Echo Service** - Encrypted POST request testing
+- **Stable Certificates** - Generated once, reused across builds (idempotent)
+- **Static Resource Compression** - Gzip-compressed HTML and JavaScript
+- **Multiple Connections** - TLS handshake with multiple simultaneous clients
+- **Port: 4443** - Standard HTTPS port
+
+**Certificate System:**
+- Uses self-signed certificates (appropriate for embedded systems)
+- Auto-generated with 2020-2100 validity window (no NTP/clock dependency)
+- Certificates stored in `src/certs/` directory
+- Regeneration prevented on each build (maintains stable HTTPS connections)
+- Python script handles certificate lifecycle (idempotent generation)
+
+**Learning Topics:**
+- HTTPS/TLS protocol implementation
+- SSL/TLS certificate generation and management
+- TLS handshake process
+- Encrypted communication channels
+- Self-signed certificate usage
+- Secure REST API design
+- Production-ready server patterns
+
+**Quick Start:**
+```bash
+# Build
+west build -b stm32h573i_dk apps/networking/ETHERNET/_12_https_server_basic
+
+# Flash
+west flash
+
+# Access (accept self-signed certificate warning)
+https://192.168.1.100:4443
+```
+
+**Test with curl:**
+```bash
+curl -k https://192.168.1.100:4443/device-info
+curl -k -X POST -d "test" https://192.168.1.100:4443/echo
+```
+
 ## Network Configuration
 
 Default: 192.168.1.100/24
