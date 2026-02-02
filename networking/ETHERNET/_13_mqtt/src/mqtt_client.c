@@ -65,7 +65,7 @@ static int tls_init(void)
 							ca_certificate, sizeof(ca_certificate));
 	if (rc < 0)
 	{
-		LOG_ERR("Failed to register public certificate: %d", rc);
+		printk("Failed to register public certificate: %d\n", rc);
 		return rc;
 	}
 
@@ -110,6 +110,15 @@ static inline void on_mqtt_connect(void)
 	printk("Client ID: %s\n", client_id);
 	printk("Port: %s\n", MQTT_BROKER_PORT);
 	printk("TLS: %s\n",
+#if defined(CONFIG_MQTT_LIB_TLS)
+		   "Enabled"
+#else
+		   "Disabled"
+#endif
+	);
+}
+
+static inline void on_mqtt_disconnect(void)
 {
 		mqtt_connected = false;
 		clear_fds();
@@ -131,7 +140,7 @@ static void on_mqtt_publish(struct mqtt_client *const client, const struct mqtt_
 									   MQTT_PAYLOAD_SIZE);
 		if (rc < 0)
 		{
-			LOG_ERR("Failed to read received MQTT payload [%d]", rc);
+			printk("Failed to read received MQTT payload [%d]\n", rc);
 			return;
 		}
 		/* Place null terminator at end of payload buffer */
@@ -224,11 +233,11 @@ static void mqtt_event_handler(struct mqtt_client *const client, const struct mq
 		case MQTT_EVT_SUBACK:
 			if (evt->result == MQTT_SUBACK_FAILURE)
 			{
-				LOG_ERR("MQTT SUBACK error [%d]", evt->result);
+				printk("MQTT SUBACK error [%d]\n", evt->result);
 				break;
 			}
 
-			LOG_INF("SUBACK packet ID: %d", evt->param.suback.message_id);
+			printk("SUBACK packet ID: %d\n", evt->param.suback.message_id);
 			break;
 
 		case MQTT_EVT_PUBLISH:
@@ -317,7 +326,7 @@ int app_mqtt_publish(struct mqtt_client *client)
 		rc = get_mqtt_payload(&payload);
 		if (rc != 0)
 		{
-			LOG_ERR("Failed to get MQTT payload [%d]", rc);
+			printk("Failed to get MQTT payload [%d]\n", rc);
 		}
 
 		param.message.topic = topic;
@@ -329,10 +338,10 @@ int app_mqtt_publish(struct mqtt_client *client)
 		rc = mqtt_publish(client, &param);
 		if (rc != 0)
 		{
-			LOG_ERR("MQTT Publish failed [%d]", rc);
+			printk("MQTT Publish failed [%d]\n", rc);
 		}
 
-		LOG_INF("Published to topic '%s', QoS %d",
+		printk("Published to topic '%s', QoS %d\n",
 				param.message.topic.topic.utf8,
 				param.message.topic.qos);
 
@@ -434,7 +443,7 @@ void app_mqtt_connect(struct mqtt_client *client)
 			rc = mqtt_connect(client);
 			if (rc != 0)
 			{
-				LOG_ERR("MQTT Connect failed [%d]", rc);
+				printk("MQTT Connect failed [%d]\n", rc);
 				k_msleep(MSECS_WAIT_RECONNECT);
 				continue;
 			}
