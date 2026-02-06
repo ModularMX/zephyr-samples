@@ -1,6 +1,8 @@
 data_structures/HEAP
 data_structures/SLISTS
 storage/FLASH
+storage/EEPROM
+storage/FLS
 kernel/MAILBOXES
 kernel/SEMAPHORES
 kernel/MUTEXES
@@ -8,5 +10,7 @@ kernel/PIPES
 hal_drivers/INTERRUPTS
 hal_drivers/SPI
 hal_drivers/ADC
-middleware/SMF
+wireless/BLUETOOTH
+wireless/WIFI
+wireless/LORA
 TEMP
