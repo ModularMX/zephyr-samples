@@ -17,18 +17,18 @@
 #include <zephyr/drivers/gpio.h>
 
 
-/*we are using pin functions with no access to device tree, so the only
-way to achieve hardware agnostic is use adefine with the pin to use 
-according to board in use*/
-#ifdef CONFIG_SOC_NRF54L15
+/*we are using pin functions with no access to device tree, so the onlyway to achieve 
+hardware agnostic is use adefine with the pin to use way to achieve hardware agnostic 
+is use adefine with the pin to use according to board in use (use of kconfig to define 
+a pin is not recommended according to official Zephyr documentation)*/
+#if defined(CONFIG_BOARD_NRF54L15DK)
     #define PORT_PIN 9
-#elif defined(CONFIG_SOC_STM32G0B1XX)
-#define PORT_PIN 5
+#elif defined(CONFIG_BOARD_NUCLEO_G0B1RE)
+    #define PORT_PIN 5
 #elif defined(CONFIG_BOARD_STM32H573I_DK)
-/* Blue LED is on GPIOF pin 4 on stm32h573i_dk */
-#define PORT_PIN 4
-#elif defined(CONFIG_SOC_POSIX)
-#define PORT_PIN 0
+    #define PORT_PIN 4
+#elif defined(CONFIG_BOARD_NATIVE_SIM)
+    #define PORT_PIN 0
 #else
     #error "Define the pin to toggle for your board"
 #endif 

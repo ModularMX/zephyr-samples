@@ -7,6 +7,7 @@
  * and displays it using printk.
  * - On nrf54l15-DK it reads pin P0.13
  * - On STM32G0B1-DK it reads pin PC13
+ * - On STM32H573I-DK it reads pin PC13
  * - On POSIX it reads pin 0
  */
 /* Include libraries */
@@ -14,14 +15,17 @@
 #include <zephyr/drivers/gpio.h>
 
 
-/*we are using pin functions with no access to device tree, so the only
-way to achieve hardware agnostic is use adefine with the pin to use 
-according to board in use*/
-#ifdef CONFIG_SOC_NRF54L15
+/*we are using pin functions with no access to device tree, so the onlyway to achieve 
+hardware agnostic is use adefine with the pin to use way to achieve hardware agnostic 
+is use adefine with the pin to use according to board in use (use of kconfig to define 
+a pin is not recommended according to official Zephyr documentation)*/
+#if defined(CONFIG_BOARD_NRF54L15DK)
     #define PORT_PIN 13
-#elif CONFIG_SOC_STM32G0B1XX
+#elif defined(CONFIG_BOARD_STM32G0B1RE)
     #define PORT_PIN 13
-#elif CONFIG_SOC_POSIX
+#elif defined(CONFIG_BOARD_STM32H573I_DK)
+    #define PORT_PIN 13
+#elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PIN 0
 #else
     #error "Define the pin to toggle for your board"

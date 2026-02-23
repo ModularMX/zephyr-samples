@@ -6,6 +6,7 @@
  * gpio_port_toggle_bits(). The pins to toggle are defined based on the board in use.
  * - For the nrf54l15dk board, pin 9 and 7 from port 2 is toggled every 300ms.
  * - From the nucleo_g0b1re board, pin 0 and 1 from port C is toggled every 300ms.
+ * - From the stm32h573i_dk board, pin 4 and 1 from port F is toggled every 300ms.
  * - From the native_sim board, pin 0 and 1 from port 0 is toggled every 300ms.
  */
 /* Include libraries */
@@ -13,16 +14,20 @@
 #include <zephyr/drivers/gpio.h>
 
 
-/*we are using pin functions with no access to device tree, so the only
-way to achieve hardware agnostic is use adefine with the pin to use 
-according to board in use*/
-#ifdef CONFIG_SOC_NRF54L15
+/*we are using pin functions with no access to device tree, so the onlyway to achieve 
+hardware agnostic is use adefine with the pin to use way to achieve hardware agnostic 
+is use adefine with the pin to use according to board in use (use of kconfig to define 
+a pin is not recommended according to official Zephyr documentation)*/
+#if defined(CONFIG_BOARD_NRF54L15DK)
     #define PORT_PINA 9
     #define PORT_PINB 7
-#elif CONFIG_SOC_STM32G0B1XX
+#elif defined(CONFIG_BOARD_NUCLEO_G0B1RE)
     #define PORT_PINA 0
     #define PORT_PINB 1
-#elif CONFIG_SOC_POSIX
+#elif defined(CONFIG_BOARD_STM32H573I_DK)
+    #define PORT_PINA 4
+    #define PORT_PINB 1
+#elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PINA 0
     #define PORT_PINB 1
 #else
