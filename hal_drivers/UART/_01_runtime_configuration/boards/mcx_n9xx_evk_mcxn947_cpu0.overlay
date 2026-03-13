@@ -1,0 +1,25 @@
+/ {
+    aliases {
+        uart = &flexcomm4_lpuart4;
+    };  
+};
+
+/*configure the uart 30, 115200 bauds, 8N1*/
+&flexcomm4_lpuart4 {
+    status = "okay";
+    pinctrl-0 = <&uart_pins>;
+	pinctrl-names = "default";
+};
+
+/*configure uart pins as Tx and Rx pins*/
+&pinctrl {
+	uart_pins: uart_pins {
+		group0 {
+			pinmux = <FC4_P0_PIO1_8>, <FC4_P1_PIO1_9>;
+            slew-rate = "fast";
+			drive-strength = "low";
+			input-enable;
+			bias-pull-up;
+        };
+    };
+};
