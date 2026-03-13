@@ -10,7 +10,7 @@
     rest of the properties */
     pin {
         gpio-hog;
-        gpios = <4 GPIO_ACTIVE_HIGH>;
+        gpios = <0 GPIO_ACTIVE_HIGH>, <1 GPIO_ACTIVE_HIGH>, <2 GPIO_ACTIVE_HIGH>, <3 GPIO_ACTIVE_HIGH>, <4 GPIO_ACTIVE_HIGH>;
         output-high;
         line-name = "output pin"; 
     };

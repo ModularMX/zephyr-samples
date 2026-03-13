@@ -8,7 +8,7 @@
     myLed_0: myLed_0 {
         /* use our custom binding */
         compatible = "pin-custom";
-        gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+        gpios = <&gpiof 4 GPIO_ACTIVE_HIGH>;
     };
 
     /* Create a node called button */
