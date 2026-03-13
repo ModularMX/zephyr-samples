@@ -15,11 +15,18 @@ cd directory
 west init
 west update
 git clone https://github.com/ModularMX/zephyr-samples.git samples
-west build -b native_sim -p always ./samples/hal_drivers/GPIOS/_07_pin_custom_binding
+west build -b native_sim -p always samples/hal_drivers/GPIOS/_07_pin_custom_binding
 ```
 
-A few things to keep in mind
+The most common supported boards youa re going to find are the following ones
 
-- Each sample is written as simply as possible. Return values are intentionally not checked in these samples, but you should check them in production code.
+- native_sim
+- nucleo_g0b1re
+- nrf54l15dk/nrf54l15/cpuapp
+- mcx_n9xx_evk/mcxn947/cpu0
+
+### A few things to keep in mind
+
+- Each sample is written as simply as possible. Return values are intentionally not checked in these samples, but you should do it, in production code.
 - Some examples are only supported by a few boards, always check the **boards/** on every sample
 - Yes, we accept pull requests, especially from our students. 

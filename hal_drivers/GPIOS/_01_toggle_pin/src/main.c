@@ -7,10 +7,8 @@
  * - For the nrf54l15dk board, pin 9 from port 2 is toggled.
  * - For the nucleo_g0b1re board, pin 5 from port A is toggled.
  * - For the stm32h573i_dk board, pin 4 from port F (blue LED) is toggled.
+ * - For the mcx_n9xx_evk board, pin 10 from port 0 is toggled.
  * - For the native_sim board, pin 0 from port 0 is toggled.
- *
- * The toggle delay can be configured at build time (default: 300ms).
- * Example: west build -b <board> -- -DTOGGLE_DELAY_MS=500
  */
 /* Include libraries */
 #include <zephyr/kernel.h>
@@ -27,6 +25,8 @@ a pin is not recommended according to official Zephyr documentation)*/
     #define PORT_PIN 5
 #elif defined(CONFIG_BOARD_STM32H573I_DK)
     #define PORT_PIN 4
+#elif defined(CONFIG_BOARD_MCX_N9XX_EVK)
+    #define PORT_PIN 10
 #elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PIN 0
 #else
@@ -45,8 +45,8 @@ int main( void )
     {
         /* Toggle pin from port using a port function */
         gpio_pin_toggle( port, PORT_PIN );
-        /* Delay configured at build time (default: 300ms) */
-        k_msleep(TOGGLE_DELAY_MS);
+        /* Delay configured at build time (default: 500ms) */
+        k_msleep(500);
     }
     return 0;
 }

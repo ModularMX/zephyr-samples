@@ -12,12 +12,6 @@ cmake_minimum_required( VERSION 3.20.0 )
 # Only enable temporarily for device tree debugging.
 # set(ZEPHYR_SCA_VARIANT dtdoctor)
 
-# Configurable toggle delay in milliseconds (default: 300ms)
-# Override with: west build -b <board> -- -DTOGGLE_DELAY_MS=500
-if(NOT DEFINED TOGGLE_DELAY_MS)
-    set(TOGGLE_DELAY_MS 300)
-endif()
-
 # Get Zephyr directory
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 

@@ -7,6 +7,7 @@
  * - For the nrf54l15dk board, pin 9 and 7 from port 2 is toggled every 300ms.
  * - From the nucleo_g0b1re board, pin 0 and 1 from port C is toggled every 300ms.
  * - From the stm32h573i_dk board, pin 4 and 1 from port F is toggled every 300ms.
+ * - From the mcx_n9xx_evk board, pin 10 and 27 from port 0 is toggled every 300ms.
  * - From the native_sim board, pin 0 and 1 from port 0 is toggled every 300ms.
  */
 /* Include libraries */
@@ -27,6 +28,9 @@ a pin is not recommended according to official Zephyr documentation)*/
 #elif defined(CONFIG_BOARD_STM32H573I_DK)
     #define PORT_PINA 4
     #define PORT_PINB 1
+#elif defined(CONFIG_BOARD_MCX_N9XX_EVK)
+    #define PORT_PINA 10
+    #define PORT_PINB 27
 #elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PINA 0
     #define PORT_PINB 1

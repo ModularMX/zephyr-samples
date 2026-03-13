@@ -8,6 +8,7 @@
  * - On nrf54l15-DK it reads pin P0.13
  * - On STM32G0B1-DK it reads pin PC13
  * - On STM32H573I-DK it reads pin PC13
+ * - On MCX_N9XX_EVK it reads pin P0.23
  * - On POSIX it reads pin 0
  */
 /* Include libraries */
@@ -25,6 +26,8 @@ a pin is not recommended according to official Zephyr documentation)*/
     #define PORT_PIN 13
 #elif defined(CONFIG_BOARD_STM32H573I_DK)
     #define PORT_PIN 13
+#elif defined(CONFIG_BOARD_MCX_N9XX_EVK)
+    #define PORT_PIN 23
 #elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PIN 0
 #else
