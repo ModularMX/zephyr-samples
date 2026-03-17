@@ -1,0 +1,17 @@
+/ {
+    aliases {
+        uart = &usart1;
+    };  
+};
+
+/*configure the usart 1, 115200 bauds, 8N1. ST already ships pins configuration
+definition as part of the hal_smt32 module, refer to stm32h573iikxq-pinctrl.dtsi*/
+&usart2 {
+    status = "okay";
+    current-speed = <115200>;
+    stop-bits = "1";
+    data-bits = <8>;
+    parity = "none";
+	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
+	pinctrl-names = "default";
+};
