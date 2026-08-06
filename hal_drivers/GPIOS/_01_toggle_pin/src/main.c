@@ -8,6 +8,7 @@
  * - For the nucleo_g0b1re board, pin 5 from port A is toggled.
  * - For the stm32h573i_dk board, pin 4 from port F (blue LED) is toggled.
  * - For the mcx_n9xx_evk board, pin 10 from port 0 is toggled.
+ * - For the frdm_mcxa156 board, pin 12 from port 0 is toggled.
  * - For the native_sim board, pin 0 from port 0 is toggled.
  */
 /* Include libraries */
@@ -27,6 +28,8 @@ a pin is not recommended according to official Zephyr documentation)*/
     #define PORT_PIN 4
 #elif defined(CONFIG_BOARD_MCX_N9XX_EVK)
     #define PORT_PIN 10
+#elif defined(CONFIG_BOARD_FRDM_MCXA156)
+    #define PORT_PIN 12
 #elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PIN 0
 #else

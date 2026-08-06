@@ -23,6 +23,8 @@ a pin is not recommended according to official Zephyr documentation)*/
     #define PORT_PIN 4
 #elif defined(CONFIG_BOARD_MCX_N9XX_EVK)
     #define PORT_PIN 10
+#elif defined(CONFIG_BOARD_FRDM_MCXA156)
+    #define PORT_PIN 12
 #elif defined(CONFIG_BOARD_NATIVE_SIM)
     #define PORT_PIN 0
 #else

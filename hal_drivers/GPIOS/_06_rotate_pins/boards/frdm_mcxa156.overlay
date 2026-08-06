@@ -1,10 +1,10 @@
 / {
     aliases {
-        gpio = &gpiof;
+        gpio = &gpio2;
     };
 };
 
-&gpiof {
+&gpio4 {
     /* Declare an internal node name "pin" and set pins 0 - 4 as output with init 
     state as high level, you can read gpio-controller.yaml file to check the 
     rest of the properties */

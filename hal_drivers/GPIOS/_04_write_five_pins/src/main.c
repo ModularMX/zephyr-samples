@@ -8,6 +8,8 @@
  * availabe to be used as GPIOs.
  * - On nrf54l15dk we are using port1
  * - On nucleo_g0b1re we are using portc
+ * - On mcx_n9xx_evk we are using port4
+ * - On frdm_mcxa156 we are using port2
  * - On native_sim we are using port0
  */
 /* Include libraries */
