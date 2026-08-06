@@ -4,7 +4,7 @@
     };  
 };
 
-/*configure the usart 1, 115200 bauds, 8N1. ST already ships pins configuration
+/*configure the usart 1. ST already ships pins configuration
 definition as part of the hal_smt32 module, refer to stm32h573iikxq-pinctrl.dtsi*/
 &usart2 {
     status = "okay";

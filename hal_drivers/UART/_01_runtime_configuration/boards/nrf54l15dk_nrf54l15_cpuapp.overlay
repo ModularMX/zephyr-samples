@@ -4,7 +4,7 @@
     };  
 };
 
-/*configure the uart 30, 115200 bauds, 8N1*/
+/*enable and configure pins for the uart 30*/
 &uart30 {
     status = "okay";
     pinctrl-0 = <&uart_pins>;
