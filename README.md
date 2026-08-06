@@ -18,12 +18,14 @@ git clone https://github.com/ModularMX/zephyr-samples.git samples
 west build -b native_sim -p always samples/hal_drivers/GPIOS/_07_pin_custom_binding
 ```
 
-The most common supported boards youa re going to find are the following ones
+The most common supported boards you are going to find are the following ones, but not all of them are supported on every example
 
 - native_sim
 - nucleo_g0b1re
+- stm32h573i_dk
 - nrf54l15dk/nrf54l15/cpuapp
 - mcx_n9xx_evk/mcxn947/cpu0
+- frdm_mcxa156
 
 ### A few things to keep in mind
 
