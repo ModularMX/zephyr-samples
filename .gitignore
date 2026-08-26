@@ -7,9 +7,13 @@ kernel/MAILBOXES
 kernel/SEMAPHORES
 kernel/MUTEXES
 kernel/PIPES
-hal_drivers/INTERRUPTS
+hal_drivers/INTERRUPTS/_08*
+hal_drivers/INTERRUPTS/_09*
 hal_drivers/SPI
 hal_drivers/ADC
+hal_drivers/COUNTERS
+hal_drivers/I2C
+sensors
 wireless/BLUETOOTH
 wireless/WIFI
 wireless/LORA
